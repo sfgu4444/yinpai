@@ -1,0 +1,42 @@
+spring:
+    datasource:
+        url: jdbc:mysql://rm-2ze0u477c69t0af47to.mysql.rds.aliyuncs.com:3306/yinpai?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&allowMultiQueries=true&useSSL=false&allowPublicKeyRetrieval=true
+        username: yinpai
+        password: yinpai123
+        driver-class-name: com.mysql.cj.jdbc.Driver
+    jpa:
+        hibernate:
+            ddl-auto: update
+    freemarker:
+        suffix: .ftl
+    mvc:
+        static-path-pattern: /static/**
+
+oss:
+    access:
+        keyId: "LTAI4GDrZ8bV6ZYEjbRe9TmC"
+        keySecret: "3h3YJ4kxQIbpyt7N5FQk7Y2LSffBXW"
+    bucketName: "yinpai"
+    endpoint:
+        outer: "oss-cn-beijing.aliyuncs.com"
+        inner: "oss-cn-beijing-internal.aliyuncs.com"
+
+yinpai:
+#    url: http://localhost:8080
+    url: http://182.92.123.102:8080
+
+wechat:
+    opAppId: wx82747677e95be29f
+    opMchId: 1552122041
+    opMchkey: 1rainbow2visionblue3icloudeep123
+    opNotifyUrl: http://admin.tian-wang.com/mall/pay/callbackWxAppPay
+
+alipay:
+    serverUrl: https://openapi.alipay.com/gateway.do
+    appId: 2018101561702230
+    charset: utf-8
+    signType: RSA2
+    notifyUrl: http://admin.tian-wang.com/mall/pay/callbackAlipayApp
+    timeoutExpress: 10m
+    alipayPublicKey: MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAnpfW56cByxnHsGx+HvMVTvD1faMWLVFiwXPzSTN8qbe0w+Wz1zUIPJ1lEA/pKpnBYwLDGFcgf8q7zt/xpcelH6d+cfB/cO4abMX3uknSwUj5iDVuCnap7uAl1Kl1KKw7UyV1cNyeLqYsvnWU+bwfoE2iBnmrqm3qdqW7RVAMI+4y54ZVfx5AEl2ALGF286I2MqtCfxhR2Coq94YTnjDn1hu0YoLiBBCiH6fKGwBsLPuvi6SbUa0CnWr1KzZkM8Mthh9c7AMLrZ/TJGtLJ/AAy07Qo/1nNQpno1gZubaUA81lihFTn07UgFADDMchtpp8Su9naII4ptLgkPvkIkH5ywIDAQAB
+    appPrivateKey: MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCxuiiydY/t2/mn0X2UY80aPgIYAxM/7S+RrYrVc3V9mRiZ1xEWUiauqD2UlVb2LLA8fk1M2ddnSt+4T+pXdCBLM8FN+7gQEhuhMssEEUhS2Xz+3nK7Ei/9gxYM03idKj+qRT7jb/UjzybBJ7dT419mPb5rZVdX+N6k2QO8U1/DRSsY71gx8QmfMokmkCp+VktzqpmlbawXCsAHEikaS8YlZfcLHfP3qMhc8xNy4SsUye1jwf3X181d3BebPS/Z92DoMitO0UOMvgRBAY3pG/JERItz1u/DMiYy2ZGGbAdrBn6mRtIeHCZ0AJWpIDxZw8o/nAsKWlF1HOIe9D2Uee7TAgMBAAECggEAOGxHW1CjXvpFKhgB7Eg65yfkdkcTp2nffjpAJz++fx9Jhh2XGST/jtdupWs77m+Fi871L37BOdO1bshAN39weS93IRDXAJMfHnAHr8Tk1xig7DEm72j4v10MdQn18r9k8uOE8aOribDMNuoq84Dt2oGjoGjN7+nclS0oWHOHpXAZaJS/9nII+cbYuoNw4kq+NQtI3z/lFHVULwEZo6edcBfT8iEYGz+UrjysnH/lxVdMqnPvd3/NKKhBwf3miHHiJZ6Fo6v1VPdW1lQk5Q1JqzDs3E4d2Db2ZGeRW06cUIkxM0q9kRb9ZeXeF67SORu5gDGGslQwnU2EcNw5yQ9GAQKBgQD0idLhrOjGMMUNjZTlDfBtUyjR4QKmz6ynPk3q4/GaLAmxXOOb52PLxjL37EhHGSD/ZSMaPXzFoOCrkUNEVJr3q+OV12cwoKaqn959tBpDmspRuZglIoXpMMSiryhXOuiJ0P22UzoyUXqZXuVjqbZ94KjZy6xeiagwlHxYLDphUwKBgQC6Dq24D7l/2NYJhX1bqeMxCPA/euEJtDR57wRED07c9eAGQ/sr78pXAIAKrePxR+hk9EDQBY7rxw3ZOQ5c77Ax7BmvZrXUmkj2fJsvl679VC2FVWnBeCIOKWgDc6zRyezEhWhmVUXVKq2BrCKPKLT/DXvhZIptc12jgnAWXKUMgQKBgQCwE5FBp/QPyMwKXzin2WqV/Xv163OyUvS5k5YdHLY5UZ5FFGJbPrhP4M2QUJUWhJSK8PLekQmHb7h2MOljiRvwW9dKbEhD7lkzoFte3dDPfuRRBjbz/jC34MKldUOx05veqBoXL0RHOP3y8y5unaPmbV6HPC1IAQyWtkP2ZRpAOwKBgEJsXR6aFoqK+hbaHl/sLdziqQqwrsiNGjLx3t8BbBE8gmcaPAB6kg0vc4bcf8Uy+8eW39CkO1r3bH1Bflw1gfzAoobZL08gaa393FVIXMO6GqpATQox/k55/9VDpc4bvbiHPDdUeCLbIqhpsMjVKpDn2nMkNrtOdX6bYbLKDm6BAoGBAK55SktfSubjl7Ys5hxHv9pErgAfq88XzoDQnnr5zluTlAOzVOa5BzvbG0FhQip5eVp/YYHPsc9EqvBsjc+fKQNgyZRaGGhAbxIIqqbX5ota9WkWZZ8huIR/3TiETDrqT+L1vTs8wJmSAqJKUxhj6MS40/R+VzjtSN8VQeHoCo0q
