@@ -272,10 +272,11 @@
             ,done: function(res){
                 layer.closeAll('loading'); //关闭loading
                 if(res.code == 200){
+                   console.log("-------  /oss/works/upload ：", res);
                     $('#cover img').attr({
                         'id': 'coverImageUrl',
                     });
-                    $("input[name=coverImageUrl]").val(res.data);
+                    $("input[name=coverImageUrl]").val(res.data.data);
                 }else{
                     layer.msg(res.msg,{anim:6,time:2000});
                 }
@@ -309,14 +310,15 @@
                 $('#uploaderDetail').append(
                     '<div id="" class="file-iteme">' +
                     '<div class="handle"><i class="layui-icon">&#x1006;</i></div>' +
-                    '<img style="width: 100px;height: 100px;" src="' + res.data + '">' +
+                    '<img style="width: 100px;height: 100px;" src="' + res.data.data + '">' +
                     '</div>'
                 );
                 goodsDetailNum += 1;
                 if (goodsDetailNum > 10) {
                     $('#imagesResources').hide();
                 }
-                imageResourceList.push(res.data);
+                 console.log("-------  list ：", res.data);
+                imageResourceList.push(res.data.data);
                 $('#goodsImagesDetail').val(JSON.stringify(imageResourceList));
                 layer.closeAll('loading');
                 layer.msg('上传成功！', {icon: 1, time: 1000});
