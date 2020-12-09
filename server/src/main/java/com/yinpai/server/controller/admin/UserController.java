@@ -5,6 +5,7 @@ import com.yinpai.server.service.UserService;
 import com.yinpai.server.utils.PageUtil;
 import com.yinpai.server.utils.ResultUtil;
 import com.yinpai.server.vo.admin.ResultVO;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -21,6 +22,7 @@ import java.util.Map;
  * @email 352342845@qq.com
  * @date 2020/9/28 6:01 下午
  */
+@Slf4j
 @Controller("adminUserController")
 @RequestMapping("/admin/user")
 public class UserController {
@@ -38,6 +40,7 @@ public class UserController {
                              Map<String, Object> map) {
         Sort sort = Sort.by(Sort.Direction.DESC, "id");
         PageRequest request = PageRequest.of(page - 1, size, sort);
+
         HashMap<String, String> conditionMap = new HashMap<>();
         conditionMap.put("userName", "like");
         Page<User> list = userService.findFilterAll(conditionMap, request);

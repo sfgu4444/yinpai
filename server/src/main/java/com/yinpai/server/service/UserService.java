@@ -108,6 +108,7 @@ public class UserService {
         user.setPassword(DigestUtils.md5Hex("yin" + password + "pai"));
         user.setPhone(phone);
         user.setMoney(0);
+        user.setStatus(1);
         userRepository.save(user);
     }
 
