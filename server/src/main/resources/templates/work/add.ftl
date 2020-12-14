@@ -272,7 +272,6 @@
             ,done: function(res){
                 layer.closeAll('loading'); //关闭loading
                 if(res.code == 200){
-                   console.log("-------  /oss/works/upload ：", res);
                     $('#cover img').attr({
                         'id': 'coverImageUrl',
                     });
@@ -317,7 +316,6 @@
                 if (goodsDetailNum > 10) {
                     $('#imagesResources').hide();
                 }
-                 console.log("-------  list ：", res.data);
                 imageResourceList.push(res.data.data);
                 $('#goodsImagesDetail').val(JSON.stringify(imageResourceList));
                 layer.closeAll('loading');

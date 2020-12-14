@@ -41,9 +41,7 @@ public class AdminAuthorizeAspect {
      */
     @Before("verify()")
     public void doVerify(){
-        // 默认admin 全部展示
         //LoginAdminThreadLocal.set(LoginAdminInfoDto.builder().adminId(1).superAdmin(true).isAudit(CommonEnum.NO.getCode()).build());
-        // 限制 admin 展示部分
         HttpServletRequest request = ProjectUtil.getRequest();
         Cookie cookie = CookieUtil.get(request, "token");
         // 没有cookie去登陆

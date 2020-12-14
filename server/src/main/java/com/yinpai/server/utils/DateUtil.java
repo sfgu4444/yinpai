@@ -268,4 +268,9 @@ public class DateUtil {
         }
         return calendar.get(scale);
     }
+
+    public static String getMMDDYYHHMMSS(Date source) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd-HH:mm:ss");
+        return sdf.format(source);
+    }
 }

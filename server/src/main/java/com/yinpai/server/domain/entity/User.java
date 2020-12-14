@@ -44,4 +44,5 @@ public class User{
     private Date createTime = new Date();
 
     private Date updateTime = new Date();
+
 }
