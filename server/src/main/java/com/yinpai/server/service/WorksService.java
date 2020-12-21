@@ -6,7 +6,9 @@ import com.yinpai.server.domain.dto.PageResponse;
 import com.yinpai.server.domain.dto.fiter.WorksFilterDto;
 import com.yinpai.server.domain.entity.UserDownloadRecord;
 import com.yinpai.server.domain.entity.Works;
+import com.yinpai.server.domain.entity.WorksLookLog;
 import com.yinpai.server.domain.entity.admin.Admin;
+import com.yinpai.server.domain.repository.WorksLookLogRepository;
 import com.yinpai.server.domain.repository.WorksRepository;
 import com.yinpai.server.enums.CommonEnum;
 import com.yinpai.server.exception.NotLoginException;
@@ -64,8 +66,10 @@ public class WorksService {
 
     private final WorksCommentService worksCommentService;
 
+    private final WorksLookLogRepository worksLookLogRepository;
+
     @Autowired
-    public WorksService(WorksRepository worksRepository, UserService userService, UserFollowService userFollowService, WorksResourcesService worksResourcesService, @Lazy UserCollectionService userCollectionService, AdminService adminService, @Lazy UserPayService userPayService, @Lazy UserDownloadRecordService userDownloadRecordService, @Lazy WorksCommentService worksCommentService) {
+    public WorksService(WorksRepository worksRepository, UserService userService, UserFollowService userFollowService, WorksResourcesService worksResourcesService, @Lazy UserCollectionService userCollectionService, AdminService adminService, @Lazy UserPayService userPayService, @Lazy UserDownloadRecordService userDownloadRecordService, @Lazy WorksCommentService worksCommentService, WorksLookLogRepository worksLookLogRepository) {
         this.worksRepository = worksRepository;
         this.userService = userService;
         this.userFollowService = userFollowService;
@@ -75,6 +79,7 @@ public class WorksService {
         this.userPayService = userPayService;
         this.userDownloadRecordService = userDownloadRecordService;
         this.worksCommentService = worksCommentService;
+        this.worksLookLogRepository = worksLookLogRepository;
     }
 
     public Set<Integer> adminWorkIds(Integer adminId) {
@@ -113,17 +118,17 @@ public class WorksService {
             List<Predicate> predicatesList = new ArrayList<>();
             Optional.ofNullable(filterDto.getType()).ifPresent(u -> predicatesList.add(criteriaBuilder.equal(root.get("type"), u)));
             Optional.ofNullable(filterDto.getAdminId()).ifPresent(u -> predicatesList.add(criteriaBuilder.equal(root.get("adminId"), u)));
-            Optional.ofNullable(filterDto.getKeyword()).ifPresent( k -> {
+            Optional.ofNullable(filterDto.getKeyword()).ifPresent(k -> {
                 if (isNumeric(k)) {
                     predicatesList.add(criteriaBuilder.equal(root.get("adminId"), k));
                 } else {
                     predicatesList.add(criteriaBuilder.or(criteriaBuilder.like(root.get("title"), "%" + k + "%"), criteriaBuilder.like(root.get("content"), "%" + k + "%")));
                 }
             });
-            Optional.ofNullable(filterDto.getTitle()).ifPresent( t -> {
+            Optional.ofNullable(filterDto.getTitle()).ifPresent(t -> {
                 predicatesList.add(criteriaBuilder.like(root.get("title"), "%" + t + "%"));
             });
-            Optional.ofNullable(filterDto.getAdminIds()).ifPresent( ids -> {
+            Optional.ofNullable(filterDto.getAdminIds()).ifPresent(ids -> {
                 predicatesList.add(root.get("adminId").in(ids));
             });
             Predicate[] predicates = new Predicate[predicatesList.size()];
@@ -131,7 +136,7 @@ public class WorksService {
         };
     }
 
-    private boolean isNumeric(String str){
+    private boolean isNumeric(String str) {
         Pattern pattern = Pattern.compile("[0-9]*");
         Matcher isNum = pattern.matcher(str);
         return isNum.matches();
@@ -220,6 +225,10 @@ public class WorksService {
             }
         }
         works.setLookCount(works.getLookCount() + 1);
+        WorksLookLog worksLookLog = new WorksLookLog();
+        worksLookLog.setWorksId(workId);
+        worksLookLog.setType(works.getType());
+        worksLookLogRepository.save(worksLookLog);
         worksRepository.save(works);
         return vo;
     }

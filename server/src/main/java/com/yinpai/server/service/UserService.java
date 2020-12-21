@@ -7,6 +7,8 @@ import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.yinpai.server.domain.dto.LoginUserInfoDto;
 import com.yinpai.server.domain.entity.User;
+import com.yinpai.server.domain.entity.UserLoginLog;
+import com.yinpai.server.domain.repository.UserLoginLogRepository;
 import com.yinpai.server.domain.repository.UserRepository;
 import com.yinpai.server.exception.NotAcceptableException;
 import com.yinpai.server.exception.NotLoginException;
@@ -42,11 +44,14 @@ public class UserService {
 
     private final UserCollectionService userCollectionService;
 
+    private final UserLoginLogRepository userLoginLogRepository;
+
     @Autowired
-    public UserService(UserRepository userRepository, @Lazy UserFollowService userFollowService, @Lazy UserCollectionService userCollectionService) {
+    public UserService(UserRepository userRepository, @Lazy UserFollowService userFollowService, @Lazy UserCollectionService userCollectionService, UserLoginLogRepository userLoginLogRepository) {
         this.userRepository = userRepository;
         this.userFollowService = userFollowService;
         this.userCollectionService = userCollectionService;
+        this.userLoginLogRepository = userLoginLogRepository;
     }
 
     public User findById(Integer userId) {
@@ -91,6 +96,9 @@ public class UserService {
         if (user == null) {
             throw new EntityNotFoundException("用户名或密码不存在");
         }
+        UserLoginLog userLoginLog = new UserLoginLog();
+        userLoginLog.setUsername(user.getUsername());
+        userLoginLogRepository.save(userLoginLog);
         return TokenUtil.getToken(user);
     }
 
@@ -99,6 +107,9 @@ public class UserService {
         if (user == null) {
             throw new EntityNotFoundException("用户不存在");
         }
+        UserLoginLog userLoginLog = new UserLoginLog();
+        userLoginLog.setUsername(user.getUsername());
+        userLoginLogRepository.save(userLoginLog);
         return TokenUtil.getToken(user);
     }
 
