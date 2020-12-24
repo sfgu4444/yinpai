@@ -1,69 +1,38 @@
-package com.yinpai.server.controller.app;
+package com.yinpai.server.controller.admin;
 
-import com.yinpai.server.domain.dto.PageResponse;
-import com.yinpai.server.domain.dto.fiter.BaseFilterDto;
-import com.yinpai.server.domain.dto.fiter.WorksCommentFilterDto;
 import com.yinpai.server.domain.repository.ReportCommonRepository;
-import com.yinpai.server.domain.repository.ReportRepository;
 import com.yinpai.server.service.WorksCommentService;
-import com.yinpai.server.vo.WorksCommentListVo;
-import com.yinpai.server.vo.admin.ReportVo;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.servlet.ModelAndView;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 /**
- * @author weilai
- * @email 352342845@qq.com
- * @date 2020/9/30 9:26 下午
+ * @program server
+ * @description: 数据统计
+ * @author: liuzhenda
+ * @create: 2020/12/23 19:38
  */
-@RestController
-@RequestMapping("/works/comment")
-@Api(tags = "作品评论")
-public class WorksCommentController {
+@Controller("adminDataController")
+@RequestMapping("/admin/data")
+public class DataController {
 
-    private final WorksCommentService worksCommentService;
 
     private final ReportCommonRepository reportCommonRepository;
 
     @Autowired
-    public WorksCommentController(WorksCommentService worksCommentService, ReportCommonRepository reportCommonRepository) {
-        this.worksCommentService = worksCommentService;
+    public DataController(WorksCommentService worksCommentService, ReportCommonRepository reportCommonRepository) {
         this.reportCommonRepository = reportCommonRepository;
     }
 
-    @GetMapping
-    @ApiOperation("作品评论列表")
-    public PageResponse<WorksCommentListVo> worksCommentList(BaseFilterDto baseFilterDto,
-                                                             @ApiParam("作品ID") @RequestParam Integer workId) {
-        WorksCommentFilterDto dto = new WorksCommentFilterDto();
-        dto.setWorkId(workId);
-        dto.setPageable(baseFilterDto.getSetPageable());
-        return worksCommentService.commentList(dto);
-    }
-
-    @PostMapping
-    @ApiOperation("发表评论")
-    public Integer addComment(@ApiParam("作品ID") @RequestParam Integer workId,
-                              @ApiParam("评论内容") @RequestParam String content) {
-        return worksCommentService.addComment(workId, content);
-    }
-
-    @PersistenceContext //注入的是实体管理器,执行持久化操作
-    EntityManager entityManager;
-
-    @PostMapping("/getWorksLook")
-    @ResponseBody
-    @ApiOperation("获取统计")
-    public Map<String, Object> getWorksLook() {
+    @GetMapping("/report")
+    public ModelAndView welcome(){
 
         Map<String,Object> map = new HashMap<>();
 
@@ -111,7 +80,6 @@ public class WorksCommentController {
         map.put("reportVoListWorks",reportVoListWorks);
         map.put("reportVoUser",reportVoUser);
         map.put("reportVoListUser",reportVoListUser);
-
-        return map;
+        return new ModelAndView("data/report",map);
     }
 }

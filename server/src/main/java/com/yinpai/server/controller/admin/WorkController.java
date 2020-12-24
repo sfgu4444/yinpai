@@ -101,4 +101,5 @@ public class WorkController {
         worksService.delete(id);
         return ResultUtil.success("作品删除成功");
     }
+
 }

@@ -7,6 +7,7 @@ spring:
     jpa:
         hibernate:
             ddl-auto: update
+        show-sql: true #打印执行的sql语句
     freemarker:
         suffix: .ftl
     mvc:
@@ -44,3 +45,14 @@ alipay:
 applepay:
     lineurl: https://buy.itunes.apple.com/verifyReceipt
     boxurl: https://sandbox.itunes.apple.com/verifyReceipt
+
+logging:
+    level:
+        org.springframework.security:
+            - debug
+            - info
+        org.springframework.web: error
+        org.hibernate.SQL: debug
+        org.hibernate.engine.QueryParameters: debug
+        org.hibernate.engine.query.HQLQueryPlan: debug
+        org.hibernate.type.descriptor.sql.BasicBinder: trace

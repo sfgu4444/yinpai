@@ -110,6 +110,25 @@
             </li>
         </ul>
         </#if>
+                <#if superAdmin == true>
+                <ul id="nav">
+                    <li>
+                        <a href="javascript:;">
+                            <i class="iconfont"></i>
+                            <cite>数据统计</cite>
+                            <i class="iconfont nav_right">&#xe697;</i>
+                        </a>
+                        <ul class="sub-menu">
+                            <li>
+                                <a _href="/admin/data/report">
+                                    <i class="iconfont"></i>
+                                    <cite>数据统计</cite>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+                </#if>
     </div>
 </div>
 <!-- <div class="x-slide_left"></div> -->

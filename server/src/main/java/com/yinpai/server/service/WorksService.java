@@ -34,6 +34,8 @@ import org.springframework.util.StringUtils;
 import javax.persistence.EntityNotFoundException;
 import javax.persistence.criteria.Predicate;
 import javax.servlet.http.HttpServletRequest;
+import java.text.ParsePosition;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -354,4 +356,20 @@ public class WorksService {
         userDownloadRecordService.save(userDownloadRecord);
         return works.getZipUrl();
     }
+
+    public static String getStringDate() {
+        Date currentTime = new Date();
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String dateString = formatter.format(currentTime);
+        return dateString;
+    }
+
+    public static Date strToDateLong(String strDate) {
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        ParsePosition pos = new ParsePosition(0);
+        Date strtodate = formatter.parse(strDate, pos);
+        return strtodate;
+    }
+
+
 }

@@ -4,20 +4,18 @@ import com.yinpai.server.domain.dto.LoginAdminInfoDto;
 import com.yinpai.server.domain.dto.LoginUserInfoDto;
 import com.yinpai.server.domain.dto.PageResponse;
 import com.yinpai.server.domain.dto.fiter.WorksCommentFilterDto;
-import com.yinpai.server.domain.dto.fiter.WorksFilterDto;
 import com.yinpai.server.domain.entity.User;
 import com.yinpai.server.domain.entity.Works;
 import com.yinpai.server.domain.entity.WorksComment;
 import com.yinpai.server.domain.entity.admin.Admin;
 import com.yinpai.server.domain.repository.WorksCommentRepository;
+import com.yinpai.server.domain.repository.WorksLookLogRepository;
 import com.yinpai.server.exception.NotLoginException;
 import com.yinpai.server.thread.threadlocal.LoginAdminThreadLocal;
 import com.yinpai.server.thread.threadlocal.LoginUserThreadLocal;
 import com.yinpai.server.utils.ProjectUtil;
 import com.yinpai.server.vo.WorksCommentListVo;
 import com.yinpai.server.vo.admin.AdminWorksCommentListVo;
-import com.yinpai.server.vo.admin.AdminWorksListVo;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
@@ -162,4 +160,5 @@ public class WorksCommentService {
         WorksComment w = findByIdNotNull(id);
         worksCommentRepository.delete(w);
     }
+
 }
