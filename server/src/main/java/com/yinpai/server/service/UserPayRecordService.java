@@ -221,27 +221,41 @@ public class UserPayRecordService {
     @Value("${alipay.signType}")
     private String signType;
 
+    // 将request中的参数转换成Map
+    private static Map<String, String> convertParamsToMap(Map requestParams) {
+        Map<String, String> retMap = new HashMap<String, String>();
+        Set<Map.Entry<String, List>> entrySet = requestParams.entrySet();
+        for (Map.Entry<String, List> entry : entrySet) {
+            String name = entry.getKey();
+            List values = entry.getValue();
+            int valLen = values.size();
+            if (valLen == 1) {
+                retMap.put(name, (String) values.get(0));
+            } else if (valLen > 1) {
+                StringBuilder sb = new StringBuilder();
+                for (Object val : values) {
+                    sb.append(",").append(val);
+                }
+                retMap.put(name, sb.toString().substring(1));
+            } else {
+                retMap.put(name, "");
+            }
+        }
+        return retMap;
+    }
+
     //支付宝回调接口
     public String AliPayAppPayResult(HttpServletRequest request) {
         //调用SDK验证签名
         boolean signVerified = false;
-        Map requestParams = request.getParameterMap();
-        Map<String, String> params = new HashMap<String, String>();
-        for (Iterator iter = requestParams.keySet().iterator(); iter.hasNext(); ) {
-            String name = (String) iter.next();
-            String[] values = (String[]) requestParams.get(name);
-            String valueStr = "";
-            for (int i = 0; i < values.length; i++) {
-                valueStr = (i == values.length - 1) ? valueStr + values[i] : valueStr + values[i] + ",";
-            }
-            System.out.println(">>>>>参数" + name + ":" + valueStr);
-            params.put(name, valueStr);
-        }
-        log.info("接收回调数据成功", params);
+        String json = RequestUtils.getJson(request);
+        Map requestParams = JsonUtils.toObject(json, Map.class);
+        log.info("接收回调数据成功{}", requestParams);
+        Map<String, String> map = convertParamsToMap(requestParams);
         try {
             //验签
             signVerified = AlipaySignature.rsaCheckV1(
-                    params,
+                    map,
                     alipayPublicKey,
                     charset,
                     signType);
@@ -249,21 +263,24 @@ public class UserPayRecordService {
             log.error("验签异常", e);
         }
         // 交易状态
-        String trade_status = params.get("trade_status");
-        String out_trade_no = params.get("out_trade_no");
+        String trade_status = map.get("trade_status");
+        String out_trade_no = map.get("out_trade_no");
         // 签名校验
         if (signVerified) {
             if ("TRADE_SUCCESS".equals(trade_status) || "TRADE_FINISHED".equals(trade_status)) {
                 Optional<UserOrder> optional = userOrderRepository.findById(Long.valueOf(out_trade_no));
-                if (!optional.isPresent()) return "failure";
+                if (!optional.isPresent()) {
+                    log.error("未查询到订单信息");
+                    return "failure";
+                }
                 UserOrder userOrder = optional.get();
-                String userId = userOrder.getUserId();
+                Integer userId = Integer.parseInt(userOrder.getUserId());
                 User user = userRepository.findUserById(userId);
                 orderShip(user, userOrder);
                 return "success";
             }
         } else {
-            log.warn("交易失败,原因:" + params.get("msg"));
+            log.warn("交易失败,原因:" + requestParams.get("msg"));
             return "failure";
         }
         return "failure";
@@ -373,24 +390,23 @@ public class UserPayRecordService {
 
     private UserOrder orderShip(User user, UserOrder userOrder) {
         BigDecimal totalFee = userOrder.getTotalFee();
-        Integer orderPayStatus = userOrder.getOrderPayStatus();
-        Integer orderShipStatus = userOrder.getOrderShipStatus();
-        PayStatus orderStatus = userOrder.getOrderStatus();
+        Integer orderPayStatus = userOrder.getOrderPayStatus(); //订单付款状态(0未付款,1已付款)
+        Integer orderShipStatus = userOrder.getOrderShipStatus();//订单出货状态(0未出货,1已出货)
+        PayStatus orderStatus = userOrder.getOrderStatus(); //订单状态 unpaid,expaid, topaid;
         try {
-            if (orderStatus == PayStatus.topaid || orderShipStatus == 1) {
-                userOrder.setOrderStatus(PayStatus.topaid);
-            } else if (orderPayStatus == 1) {
-                // TODO: 2020/12/14  乐观锁
+            if (orderStatus == PayStatus.unpaid || orderShipStatus == 0 || orderPayStatus == 0) {
+                //加钱
                 addUserMoney(user, totalFee.divide(new BigDecimal(100)));
                 userOrder.setOrderShipStatus(1);
                 userOrder.setOrderStatus(PayStatus.topaid);
+                userOrder.setOrderPayStatus(1);
                 userOrder.setTimeExpire(DateUtil.getMMDDYYHHMMSS(new Date()));
             }
         } catch (Exception e) {
-            log.warn("订单发货时异常: " + userOrder);
+            log.warn("订单异常: " + userOrder);
+            userOrder.setOrderStatus(PayStatus.expaid);
             throw new RuntimeException("订单发货时异常");
         }
-
         return userOrderRepository.save(userOrder);
     }
 
