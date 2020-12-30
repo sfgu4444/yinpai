@@ -40,20 +40,10 @@ public class UserPayResultController {
     @ApiOperation("供支付宝平台回调")
     @PostMapping("/callbackAlipayApp")
     @WebLog(description = "供支付宝平台回调")
-    public String AliPayAppPayResult(Map<String,String>map){
-        return userPayRecordService.AliPayAppPayResult(map);
+    public String AliPayAppPayResult(HttpServletRequest request){
+        return userPayRecordService.AliPayAppPayResult(request);
     }
 
-    /**
-     * IOS做支付
-     * 支付完成后  数据发给后端
-     * 后端拿数据去苹果查询订单结果
-     * 结果存入数据库
-     * 然后给前端返回成功或失败
-     *
-     * @param map
-     * @return
-     */
     @ApiOperation("供苹果确认订单")
     @PostMapping("/appleOrderDetermine")
     @WebLog(description = "供苹果确认订单")

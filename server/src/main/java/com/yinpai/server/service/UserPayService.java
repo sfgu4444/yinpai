@@ -279,36 +279,13 @@ public class UserPayService {
         }
     }
 
-    /**
-     * @return
-     * alipay_sdk=alipay-sdk-java-3.4.49.ALL
-     * &app_id=2018101561702230
-     * &biz_content=%7B%22body%22%3A%22%E6%94%B6%E9%9B%86%E5%AE%9D%22%2C%22product_code%22%3A%22QUICK_MSECURITY_PAY%22%2C%22subject%22%3A%22%E8%B4%AD%E4%B9%B0%E5%95%86%E5%93%81%22%2C%22timeout_express%22%3A%2210m%22%7D
-     * &charset=utf-8
-     * &format=json
-     * &method=alipay.trade.app.pay
-     * &notify_url=http%3A%2F%2Fadmin.tian-wang.com%2Fmall%2Fpay%2FcallbackAlipayApp
-     * &sign=KwaUJT7ZsOGMD1R2mgp8MwKlxYBMM8aMRsp79a07gJQT%2B%2BWYxOqxgmG97oGjEZNaru8FKLpaWoI  签名
-     * %2BNdP8W10aaUpE2xKhbT5FVCRiTrPr6nauwEVeu00T76Y62udQ6Nn9tjkN39Sqkbf5CrBfi3JLeZfZo6553IMDT1CHzfO7%2FO%2BJwZbRofKLS%2FZkbxFv0dnDq3naWQXDavd2ZlQJwlrGhnT7IjgyOqeCaSZi59dZHtCPU32Eg4jTJYvI4cW2Poxe9CMhzaLOfrCwK%2BK8FRmmUsVM2y%2FvYhkJ06Wv%2Baf3qoo7cldfOZqkpZtaBASwDVOTez9%2BoGm81dwQP1TWrV9lOA%3D%3D
-     * &sign_type=RSA2
-     * &timestamp=2020-12-09+20%3A26%3A55&version=1.0
-     */
     public String aliPayMoney(String amount) {
         try {
-
         //获取用户信息
         LoginUserInfoDto userInfoDto = LoginUserThreadLocal.get();
         if (userInfoDto == null) {
             throw new NotLoginException("请先登陆");
         }
-        //实例化客户端
-            //String serverUrl,
-            // String appId,
-            // String privateKey,
-            // String format,
-            // String charset,
-            // String alipayPublicKey,
-            // String signType
         AlipayClient alipayClient = new DefaultAlipayClient(
                 alipayConfig.getServerUrl(),
                 alipayConfig.getAppId(),    //app_id
@@ -334,7 +311,6 @@ public class UserPayService {
         {
             Calendar expire = getInstance();
             expire.add(MINUTE, 10);
-
             UserOrder userOrder = UserOrder.builder()
                     .orderId(orderId)
                     .userId(userInfoDto.getUserId() + "")
@@ -363,14 +339,11 @@ public class UserPayService {
         request.setBizModel(model);
         //支付宝异步回调接口
         request.setNotifyUrl(alipayConfig.getNotifyUrl());
-
             //这里和普通的接口调用不同，使用的是sdkExecute
-
             AlipayTradeAppPayResponse response = alipayClient.sdkExecute(request);
             //记录支付记录,同微信一致
             return response.getBody();
         } catch (AlipayApiException e) {
-            // TODO
             log.error("【唤醒支付宝APP支付失败】订单ID：{}, 信息", e.getMessage(),e);
             throw new ProjectException("支付宝统一下单失败");
         }

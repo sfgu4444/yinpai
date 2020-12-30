@@ -224,43 +224,48 @@ public class UserPayRecordService {
     private String signType;
 
     //支付宝回调接口
-    public String AliPayAppPayResult(Map<String, String> map) {
-        boolean signVerified = false; //调用SDK验证签名
+    public String AliPayAppPayResult(HttpServletRequest request) {
+        //调用SDK验证签名
+        boolean signVerified = false;
+        Map requestParams = request.getParameterMap();
+        Map<String, String> params = new HashMap<String, String>();
+        for (Iterator iter = requestParams.keySet().iterator(); iter.hasNext(); ) {
+            String name = (String) iter.next();
+            String[] values = (String[]) requestParams.get(name);
+            String valueStr = "";
+            for (int i = 0; i < values.length; i++) {
+                valueStr = (i == values.length - 1) ? valueStr + values[i] : valueStr + values[i] + ",";
+            }
+            System.out.println(">>>>>参数" + name + ":" + valueStr);
+            params.put(name, valueStr);
+        }
+        log.info("接收回调数据成功", params);
         try {
             //验签
             signVerified = AlipaySignature.rsaCheckV1(
-                    map,
+                    params,
                     alipayPublicKey,
                     charset,
                     signType);
         } catch (AlipayApiException e) {
-            e.printStackTrace();
+            log.error("验签异常", e);
         }
         // 交易状态
-        String trade_status = map.get("trade_status");
-        String out_trade_no = map.get("out_trade_no");
+        String trade_status = params.get("trade_status");
+        String out_trade_no = params.get("out_trade_no");
         // 签名校验
         if (signVerified) {
-            // TODO 验签成功后，按照支付结果异步通知中的描述，对支付结果中的业务内容进行二次校验，
-            //  校验成功后在response中返回success并继续商户自身业务处理，校验失败返回failure
             if ("TRADE_SUCCESS".equals(trade_status) || "TRADE_FINISHED".equals(trade_status)) {
-                /**
-                 * 更新用户支付记录,添加用户充值余额
-                 */
-
                 Optional<UserOrder> optional = userOrderRepository.findById(Long.valueOf(out_trade_no));
                 if (!optional.isPresent()) return "failure";
                 UserOrder userOrder = optional.get();
                 String userId = userOrder.getUserId();
                 User user = userRepository.findUserById(userId);
                 orderShip(user, userOrder);
-
-
                 return "success";
             }
         } else {
-            // TODO 验签失败则记录异常日志，并在response中返回failure.
-            log.warn("交易失败,原因:" + map.get("msg"));
+            log.warn("交易失败,原因:" + params.get("msg"));
             return "failure";
         }
         return "failure";
