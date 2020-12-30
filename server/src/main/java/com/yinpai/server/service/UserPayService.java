@@ -225,6 +225,7 @@ public class UserPayService {
         if (userInfoDto == null) {
             throw new NotLoginException("请先登陆");
         }
+
         WxPayService wxPayService = new WxPayServiceImpl();
         WxPayConfig wxPayConfig = wechatConfig.appPayConfig();
         //交易,统一APP
@@ -258,7 +259,7 @@ public class UserPayService {
                     .orderId(orderId)
                     .userId(userInfoDto.getUserId()+"")
                     .body("收集宝")
-                    .totalFee(price)
+                    .totalFee(new BigDecimal(1)) // todo 测试时使用
                     .ipAddress(ProjectUtil.getIpAddr())
                     .timeStart(DateUtil.getMMDDYYHHMMSS(new Date()))
                     .timeExpire(DateUtil.getMMDDYYHHMMSS(expire.getTime()))
@@ -276,7 +277,7 @@ public class UserPayService {
             return wxPayAppOrderResult;
         } catch (WxPayException e) {
             // TODO
-            //     log.error("【唤醒微信APP支付失败】订单ID：{}, 信息：{}", orderEntity.getId(), e.getMessage());
+            log.error("【唤醒微信APP支付失败】订单ID：{}, 信息：{}",orderId, e.getMessage(),e);
             throw new ProjectException("微信统一下单失败");
         }
     }
@@ -296,21 +297,29 @@ public class UserPayService {
      * &timestamp=2020-12-09+20%3A26%3A55&version=1.0
      */
     public String aliPayMoney(String amount) {
+        try {
+
         //获取用户信息
         LoginUserInfoDto userInfoDto = LoginUserThreadLocal.get();
         if (userInfoDto == null) {
             throw new NotLoginException("请先登陆");
         }
         //实例化客户端
+            //String serverUrl,
+            // String appId,
+            // String privateKey,
+            // String format,
+            // String charset,
+            // String alipayPublicKey,
+            // String signType
         AlipayClient alipayClient = new DefaultAlipayClient(
+                alipayConfig.getServerUrl(),
                 alipayConfig.getAppId(),    //app_id
-                alipayConfig.getServerUrl(),    //method
                 alipayConfig.getAppPrivateKey(),
                 "json",         //format
                 alipayConfig.getCharset(),    //charset
                 alipayConfig.getAlipayPublicKey(),
                 alipayConfig.getSignType());    //sign_type
-
         //实例化具体API对应的request类,类名称和接口名称对应,当前调用接口名称：alipay.trade.app.pay
         AlipayTradeAppPayRequest request = new AlipayTradeAppPayRequest();
         //SDK已经封装掉了公共参数，这里只需要传入业务参数。以下方法为sdk的model入参方式(model和biz_content同时存在的情况下取biz_content)。
@@ -322,8 +331,8 @@ public class UserPayService {
         model.setOutTradeNo(orderId+"");
         model.setTimeoutExpress(alipayConfig.getTimeoutExpress());
         // TODO 订单总金额,暂时用1 ,生产使用 amount
-        model.setTotalAmount(1 + "");
-
+        model.setTotalAmount("0.01");
+        model.setProductCode(orderId+"");
         //创建订单
         {
             Calendar expire = getInstance();
@@ -357,14 +366,15 @@ public class UserPayService {
         request.setBizModel(model);
         //支付宝异步回调接口
         request.setNotifyUrl(alipayConfig.getNotifyUrl());
-        try {
+
             //这里和普通的接口调用不同，使用的是sdkExecute
+
             AlipayTradeAppPayResponse response = alipayClient.sdkExecute(request);
             //记录支付记录,同微信一致
             return response.getBody();
         } catch (AlipayApiException e) {
             // TODO
-         //log.error("【唤醒支付宝APP支付失败】订单ID：{}, 信息：{}", orderId, e.getMessage());
+            log.error("【唤醒支付宝APP支付失败】订单ID：{}, 信息", e.getMessage(),e);
             throw new ProjectException("支付宝统一下单失败");
         }
     }

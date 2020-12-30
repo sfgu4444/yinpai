@@ -7,7 +7,7 @@ spring:
     jpa:
         hibernate:
             ddl-auto: update
-        show-sql: true #打印执行的sql语句
+#        show-sql: true #打印执行的sql语句
     freemarker:
         suffix: .ftl
     mvc:
@@ -27,32 +27,44 @@ yinpai:
     url: http://182.92.123.102:8080
 
 wechat:
-    opAppId: wx82747677e95be29f
-    opMchId: 1552122041
-    opMchkey: 1rainbow2visionblue3icloudeep123
-    opNotifyUrl: http://admin.tian-wang.com/mall/pay/callbackWxAppPay
+    opAppId: wxecbe276412fb3eb8
+    opMchId: 1604725045
+    opMchkey: bc56e221598fc34298c8af55f2cafff7
+    opNotifyUrl: https://ypapi.phpisfuture.com/mall/pay/callbackWxAppPay
+
 
 alipay:
     serverUrl: https://openapi.alipay.com/gateway.do
-    appId: 2018101561702230
+    appId: 2021002114648310
     charset: utf-8
     signType: RSA2
-    notifyUrl: http://admin.tian-wang.com/mall/pay/callbackAlipayApp
+    notifyUrl: https://ypapi.phpisfuture.com/mall/pay/callbackAlipayApp
     timeoutExpress: 10m
-    alipayPublicKey: MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAnpfW56cByxnHsGx+HvMVTvD1faMWLVFiwXPzSTN8qbe0w+Wz1zUIPJ1lEA/pKpnBYwLDGFcgf8q7zt/xpcelH6d+cfB/cO4abMX3uknSwUj5iDVuCnap7uAl1Kl1KKw7UyV1cNyeLqYsvnWU+bwfoE2iBnmrqm3qdqW7RVAMI+4y54ZVfx5AEl2ALGF286I2MqtCfxhR2Coq94YTnjDn1hu0YoLiBBCiH6fKGwBsLPuvi6SbUa0CnWr1KzZkM8Mthh9c7AMLrZ/TJGtLJ/AAy07Qo/1nNQpno1gZubaUA81lihFTn07UgFADDMchtpp8Su9naII4ptLgkPvkIkH5ywIDAQAB
-    appPrivateKey: MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCxuiiydY/t2/mn0X2UY80aPgIYAxM/7S+RrYrVc3V9mRiZ1xEWUiauqD2UlVb2LLA8fk1M2ddnSt+4T+pXdCBLM8FN+7gQEhuhMssEEUhS2Xz+3nK7Ei/9gxYM03idKj+qRT7jb/UjzybBJ7dT419mPb5rZVdX+N6k2QO8U1/DRSsY71gx8QmfMokmkCp+VktzqpmlbawXCsAHEikaS8YlZfcLHfP3qMhc8xNy4SsUye1jwf3X181d3BebPS/Z92DoMitO0UOMvgRBAY3pG/JERItz1u/DMiYy2ZGGbAdrBn6mRtIeHCZ0AJWpIDxZw8o/nAsKWlF1HOIe9D2Uee7TAgMBAAECggEAOGxHW1CjXvpFKhgB7Eg65yfkdkcTp2nffjpAJz++fx9Jhh2XGST/jtdupWs77m+Fi871L37BOdO1bshAN39weS93IRDXAJMfHnAHr8Tk1xig7DEm72j4v10MdQn18r9k8uOE8aOribDMNuoq84Dt2oGjoGjN7+nclS0oWHOHpXAZaJS/9nII+cbYuoNw4kq+NQtI3z/lFHVULwEZo6edcBfT8iEYGz+UrjysnH/lxVdMqnPvd3/NKKhBwf3miHHiJZ6Fo6v1VPdW1lQk5Q1JqzDs3E4d2Db2ZGeRW06cUIkxM0q9kRb9ZeXeF67SORu5gDGGslQwnU2EcNw5yQ9GAQKBgQD0idLhrOjGMMUNjZTlDfBtUyjR4QKmz6ynPk3q4/GaLAmxXOOb52PLxjL37EhHGSD/ZSMaPXzFoOCrkUNEVJr3q+OV12cwoKaqn959tBpDmspRuZglIoXpMMSiryhXOuiJ0P22UzoyUXqZXuVjqbZ94KjZy6xeiagwlHxYLDphUwKBgQC6Dq24D7l/2NYJhX1bqeMxCPA/euEJtDR57wRED07c9eAGQ/sr78pXAIAKrePxR+hk9EDQBY7rxw3ZOQ5c77Ax7BmvZrXUmkj2fJsvl679VC2FVWnBeCIOKWgDc6zRyezEhWhmVUXVKq2BrCKPKLT/DXvhZIptc12jgnAWXKUMgQKBgQCwE5FBp/QPyMwKXzin2WqV/Xv163OyUvS5k5YdHLY5UZ5FFGJbPrhP4M2QUJUWhJSK8PLekQmHb7h2MOljiRvwW9dKbEhD7lkzoFte3dDPfuRRBjbz/jC34MKldUOx05veqBoXL0RHOP3y8y5unaPmbV6HPC1IAQyWtkP2ZRpAOwKBgEJsXR6aFoqK+hbaHl/sLdziqQqwrsiNGjLx3t8BbBE8gmcaPAB6kg0vc4bcf8Uy+8eW39CkO1r3bH1Bflw1gfzAoobZL08gaa393FVIXMO6GqpATQox/k55/9VDpc4bvbiHPDdUeCLbIqhpsMjVKpDn2nMkNrtOdX6bYbLKDm6BAoGBAK55SktfSubjl7Ys5hxHv9pErgAfq88XzoDQnnr5zluTlAOzVOa5BzvbG0FhQip5eVp/YYHPsc9EqvBsjc+fKQNgyZRaGGhAbxIIqqbX5ota9WkWZZ8huIR/3TiETDrqT+L1vTs8wJmSAqJKUxhj6MS40/R+VzjtSN8VQeHoCo0q
+    alipayPublicKey: MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAteyvDsVg/S4XCHAVxJRh5Gdio6Ryb2ELqRQ0mwMv+h4Jt7dVNbfmMz9k3M6nIbsYYYZuDqoHBFFLqwdQlwUlcopsTswxKJ9OBMX3aqVABD7Gd4wDcHdWB7czyyTCjIF9/5WR5MpWGGeXHm8cqfqzeJeq5MRMt8lrTglZRXkQcK2XDskII/Fquo3F+JiBJyhiWIl8uR4U6j5kRbPfelWbwJEIUOyKXY/qmdcWxiw8xLa/ide3DwkWwtwXMrT2ZbfAj2DuE9iG5F2iSlHNhUXCVB2J2QE/Gbi7rC3RKlzKGbZ7CBTEQNDH1hJEgZIWlciRm9Vote3+rvE7Gyw6hvQ1pQIDAQAB
+    appPrivateKey: MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCcFl7cfc4kIr5ycvBucvjnGz9g5htiXCYTaPFg0o4EJjH6Ia0597rf8tpH0BNzZEa+k8DPfLmpDeM/Lg3cSaOFrrKbFllZhPz643K9F6eM4P7yxAR+Jae4V0qNAQHGBksW320UiNnPOQiWXYkaNmJerrQekJlZttAXtRI0RF1PD9fs6uKZfbLyTkznUxjKVUVqPS8LvpMjTKK83O/DZn/5/CX2eJEczTBNFPFG3bQAsMXjvjwUMcjUzXTMUZvHLncq4TDGSAc35aFieVbpoF/KY8GnFJSH0S9UERppzjxzXcXKKn7M3JWpPPsdK6NHpHd6Ohl2W8W55AIn0tCwV0+vAgMBAAECggEAHnsH30r5/HiEdFkZtpfhH1Bk2glVg6m3DcdKi7vSW+ERlWUKLO3BooYMNkXd5oTIg+LaniofH3JE1EusDT6cHjj1S+/bVu3vcRcFiwOZhptRbhr1PaUg0ZDKUCrIK+GCvF65MG9hCWR71tFBOssv/oljRyy5pZlbnaWQfoBzMEL7St/9mWoCQFKOSsf82Fv5zFw8AJFeQvHNmjwWQZaMyQZV3Mxbv5uXlWSkyJX3gcTO2lf4qryinVCVLlVyA9TBpVwBqZDQcpD1aXNYg71Sb/q/EIbZl09xl5MnjRvSRpvPA7q2s6/IKR9zrs/VIS1wke+RtEw/frf4xGcEj8hPwQKBgQDd0B3bmC7y2yp3Au+kmfOzUBpQ2z67bnBRt4/BJHvVmmX0dkYhgUW7BSpEkY2DSTfWClaUOzUHGN2Dd7BdZpkh01UIelujbNwoBzRsMybqaQgw5kJxMCN04lLUK52DkgB6zxnruott/xz11u9eWpTaY2aYLNyZ5sROppgy+Oou8QKBgQC0JPn8IqQCp3dlcqUmz1l8ffN+R0aJfO46dNhaoldQpdryRKnNvjAPhntfq+/QOhYmJ5nDZdLDYBlW2R43WcRPqKWpNIzayLqAjKlpynsYYTbHYFPWAdgyZxYvg50chv0V3JXd4A86ShPsL2bMDAOyYo4kMflau5IhHUwzFXaonwKBgDxmjZrch/xNvfSGcidKXNg5OdFGwoBbhG5cI+MeQjJaRuUYx+QbxZc1wtrFH9neODwquITI0pnKJZfFIdttMsnJOGCEoSuRWynzPE0yaKhwTXCzYuhbiWwsrQ1lixDm0waeGprcQ1eCnqo7CxeQZvRJGQjbPn8SHeak6tEGgw6hAoGAVIxyQ9NiVNiSoiuPtcplvpdCvAbp5UecbBVBIjDFeFWPkFuHssfLuM2ug/WnpXxNvvShJ2NX61jkK63Vj7by+0w1DFhcr6a8We8q6DsfUQ73bdYZIv1Uojtd30kPaT8185fHQw6RNxNjjFunDKeq6IN3ISfPV7VnXWFpzSQKwBMCgYAN0PhBXUv/mxN/HzZMrY2ja3e+VOgoeDGS0rEJ0JuZG8BLve/5qv+ZudIDGn1VzNkCgMGhxa7h7gyfW9r1I3QmhmAU1lA5vZ62YHJ1aw2naYc+5v0MqW3SBMC382DSP9bT55D1czLjqssX3KIrhy9qIxRzY5k8N/y4K6+pTlifcg==
+
 
 applepay:
     lineurl: https://buy.itunes.apple.com/verifyReceipt
     boxurl: https://sandbox.itunes.apple.com/verifyReceipt
 
 logging:
-    level:
-        org.springframework.security:
-            - debug
-            - info
-        org.springframework.web: error
-        org.hibernate.SQL: debug
-        org.hibernate.engine.QueryParameters: debug
-        org.hibernate.engine.query.HQLQueryPlan: debug
-        org.hibernate.type.descriptor.sql.BasicBinder: trace
+    file:
+        name: yinpai.log
+    pattern:
+        console: '%clr(%d{yyyy-MM-dd} [%thread] %-5level %logger{50} - %msg%n)'
+        file: '%d{yyyy-MM-dd HH:mm:ss.SSS}  [%thread]  %-5level  %logger{50}  %msg%n'
+    path: logs/yinpai
+#    打印sql 日志
+#    level:
+#        org.springframework.security:
+#            - debug
+#            - info
+#        org.springframework.web: debug
+#        org.hibernate.SQL: debug
+#        org.hibernate.engine.QueryParameters: debug
+#        org.hibernate.engine.query.HQLQueryPlan: debug
+#        org.hibernate.type.descriptor.sql.BasicBinder: trace
+
+userinfo:
+    logo: 'http://yinpai.oss-cn-beijing.aliyuncs.com/yinpai/2020-12-29/fb72c656-a668-4fd6-969b-f7cc06c5b1d0534640.png'

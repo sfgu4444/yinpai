@@ -62,4 +62,7 @@ public class WorkDetailVo {
 
     @ApiModelProperty("收藏数")
     private Long collectionCount;
+
+    @ApiModelProperty("封面图")
+    public String coverImageUrl;
 }

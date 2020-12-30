@@ -4,6 +4,7 @@ import com.github.binarywang.wxpay.bean.order.WxPayAppOrderResult;
 import com.yinpai.server.domain.dto.LoginUserInfoDto;
 import com.yinpai.server.domain.entity.User;
 import com.yinpai.server.exception.NotLoginException;
+import com.yinpai.server.log.WebLog;
 import com.yinpai.server.service.UserPayService;
 import com.yinpai.server.service.UserService;
 import com.yinpai.server.service.AdminService;
@@ -71,12 +72,14 @@ public class UserPayController {
 
     @PostMapping("/wechat/{amount}")
     @ApiOperation("微信充值拍币")
+    @WebLog(description = "微信充值拍币")
     public WxPayAppOrderResult wechatPayMoney(@ApiParam("充值数量") @PathVariable String amount) {
         return userPayService.wechatPayMoney(amount);
     }
 
     @PostMapping("/alipay/{amount}")
     @ApiOperation("支付宝充值拍币")
+    @WebLog(description = "支付宝充值拍币")
     public String aliPayMoney(@ApiParam("充值数量") @PathVariable String amount) {
         return userPayService.aliPayMoney(amount);
     }

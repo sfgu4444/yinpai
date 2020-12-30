@@ -187,6 +187,7 @@ public class WorksService {
         vo.setType(works.getType());
         vo.setAdminId(works.getAdminId());
         vo.setPrice(works.getPrice());
+        vo.setCoverImageUrl(works.getCoverImageUrl());
         vo.setCommentCount(worksCommentService.commentCount(workId));
         vo.setCollectionCount(userCollectionService.workCollectionCount(workId));
         LoginUserInfoDto userInfoDto = LoginUserThreadLocal.get();

@@ -13,14 +13,17 @@ import com.yinpai.server.domain.repository.UserRepository;
 import com.yinpai.server.exception.NotAcceptableException;
 import com.yinpai.server.exception.NotLoginException;
 import com.yinpai.server.exception.ProjectException;
+import com.yinpai.server.log.WebLog;
 import com.yinpai.server.thread.threadlocal.LoginUserThreadLocal;
 import com.yinpai.server.utils.ProjectUtil;
 import com.yinpai.server.utils.TokenUtil;
 import com.yinpai.server.vo.PersonalCenterVo;
 import com.yinpai.server.vo.UserProfileVo;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -35,6 +38,7 @@ import java.util.Map;
  * @email 352342845@qq.com
  * @date 2020/9/28 11:26 上午
  */
+@Slf4j
 @Service
 public class UserService {
 
@@ -53,6 +57,10 @@ public class UserService {
         this.userCollectionService = userCollectionService;
         this.userLoginLogRepository = userLoginLogRepository;
     }
+
+    @Value("${userinfo.logo}")
+    private String user_logo;
+
 
     public User findById(Integer userId) {
         return userRepository.findById(userId).orElseGet(User::new);
@@ -90,7 +98,6 @@ public class UserService {
         Integer userId = jwt.getClaim("userId").asInt();
         return LoginUserInfoDto.builder().userId(userId).build();
     }
-
     public String userLoginPassword(String username, String password) {
         User user = userRepository.findByUsernameAndPassword(username, DigestUtils.md5Hex("yin" + password + "pai"));
         if (user == null) {
@@ -120,6 +127,7 @@ public class UserService {
         user.setPhone(phone);
         user.setMoney(0);
         user.setStatus(1);
+        user.setAvatarUrl(user_logo);
         userRepository.save(user);
     }
 

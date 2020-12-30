@@ -1,5 +1,7 @@
 package com.yinpai.server.controller.app;
 
+import com.google.gson.Gson;
+import com.yinpai.server.log.WebLog;
 import com.yinpai.server.service.UserPayRecordService;
 import com.yinpai.server.vo.WxPay.PayResultVo;
 import io.swagger.annotations.Api;
@@ -30,12 +32,15 @@ public class UserPayResultController {
 
     @ApiOperation("供微信平台回调")
     @PostMapping("/callbackWxAppPay")
+    //@WebLog(description = "供微信平台回调")
     public String wxAppPayResult(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        System.out.println("【微信平台回调】");
         return userPayRecordService.wxAppPayResult(request,response);
     }
 
     @ApiOperation("供支付宝平台回调")
     @PostMapping("/callbackAlipayApp")
+    @WebLog(description = "供支付宝平台回调")
     public String AliPayAppPayResult(Map<String,String>map){
         return userPayRecordService.AliPayAppPayResult(map);
     }
@@ -52,8 +57,10 @@ public class UserPayResultController {
      */
     @ApiOperation("供苹果确认订单")
     @PostMapping("/appleOrderDetermine")
-    public PayResultVo appleOrderDetermine(Map<String,String>map) throws JSONException {
-        return userPayRecordService.appleOrderDetermine(map);
+    @WebLog(description = "供苹果确认订单")
+    public PayResultVo appleOrderDetermine(@RequestBody Map<String,Map<String,Object>> map) throws JSONException {
+        System.out.println(new Gson().toJson(map.get("map")));
+        return userPayRecordService.appleOrderDetermine(map.get("map"));
     }
 
 

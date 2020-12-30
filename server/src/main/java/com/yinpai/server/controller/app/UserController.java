@@ -1,5 +1,6 @@
 package com.yinpai.server.controller.app;
 
+import com.yinpai.server.log.WebLog;
 import com.yinpai.server.service.OriginalApplyService;
 import com.yinpai.server.service.SmsService;
 import com.yinpai.server.service.UserAdviceService;
@@ -40,6 +41,7 @@ public class UserController {
 
     @ApiOperation("用户密码登陆")
     @PostMapping("/login/password")
+    @WebLog(description = "用户密码登陆")
     public String userLoginPassword(@ApiParam("用户名") @RequestParam("username") String username,
                                     @ApiParam("密码") @RequestParam("password") String password) {
         return userService.userLoginPassword(username, password);
@@ -47,12 +49,14 @@ public class UserController {
 
     @ApiOperation("发送验证码")
     @PostMapping("/login/sendSms")
+    @WebLog(description = "发送验证码")
     public void sendSms(@ApiParam("手机号") @RequestParam("phone") String phone) {
         smsService.sendSms(phone);
     }
 
     @ApiOperation("手机号登陆")
     @PostMapping("/login/phone")
+    @WebLog(description = "手机号登陆")
     public String userLoginPhone(@ApiParam("手机号") @RequestParam("phone") String phone,
                                  @ApiParam("验证码") @RequestParam("code") Integer code) {
         smsService.checkCode(phone, code);
@@ -61,6 +65,7 @@ public class UserController {
 
     @ApiOperation("注册")
     @PostMapping("/register")
+    @WebLog(description = "注册")
     public void register(@ApiParam("手机号") @RequestParam("phone") String phone,
                          @ApiParam("验证码") @RequestParam("code") Integer code,
                          @ApiParam("密码") @RequestParam("password") String password) {
@@ -70,6 +75,7 @@ public class UserController {
 
     @ApiOperation("忘记密码")
     @PostMapping("/forget/password")
+    @WebLog(description = "忘记密码")
     public void forgetPassword(@ApiParam("手机号") @RequestParam("phone") String phone,
                                @ApiParam("验证码") @RequestParam("code") Integer code,
                                @ApiParam("密码") @RequestParam("password") String password) {
@@ -79,24 +85,28 @@ public class UserController {
 
     @GetMapping("/profile")
     @ApiOperation("用户资料详情")
+    @WebLog(description = "用户资料详情")
     public UserProfileVo userProfile() {
         return userService.userProfile();
     }
 
     @PostMapping("/editProfile")
     @ApiOperation("修改用户资料")
+    @WebLog(description = "修改用户资料")
     public void editUserProfile (@RequestBody UserProfileVo vo) {
         userService.editUserProfile(vo);
     }
 
     @GetMapping("/personalCenter")
     @ApiOperation("/用户个人中心信息")
+    @WebLog(description = "用户个人中心信息")
     public PersonalCenterVo personalCenter() {
         return userService.personalCenter();
     }
 
     @PostMapping("/advice")
     @ApiOperation("用户建议")
+    @WebLog(description = "用户建议")
     public void addAdvice(@ApiParam("建议内容") @RequestParam String content,
                           @ApiParam("邮箱") @RequestParam String email) {
         userAdviceService.addAdvice(content, email);
@@ -104,6 +114,7 @@ public class UserController {
 
     @PostMapping("/originalApply")
     @ApiOperation("原创入驻")
+    @WebLog(description = "原创入驻")
     public void originalApply(@ApiParam("联系方式") @RequestParam String contactWay,
                               @ApiParam("qq") @RequestParam String qq,
                               @ApiParam("微信") @RequestParam String wx,
@@ -114,6 +125,7 @@ public class UserController {
 
     @PostMapping("/editPhone")
     @ApiOperation("修改手机号")
+    @WebLog(description = "修改手机号")
     public void editPhone(@ApiParam("原手机号") @RequestParam("phone") String phone,
                           @ApiParam("验证码") @RequestParam("code") Integer code,
                           @ApiParam("新手机号") @RequestParam("newPhone") String newPhone) {

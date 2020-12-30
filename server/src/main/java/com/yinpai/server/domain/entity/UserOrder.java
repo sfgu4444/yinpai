@@ -19,7 +19,7 @@ public class UserOrder {
 
     //商户订单号(唯一订单ID)
     @Id
-    @GeneratedValue
+    //@GeneratedValue
     private Long orderId;
 
     //用户ID(User中的ID)
