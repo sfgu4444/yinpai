@@ -24,6 +24,7 @@ import com.yinpai.server.vo.PayRecordListVo;
 import com.yinpai.server.vo.WxPay.PayResultVo;
 import com.yinpai.server.vo.WxPay.WxPayResult;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.codehaus.jettison.json.JSONException;
@@ -109,52 +110,55 @@ public class UserPayRecordService {
      * 3:加入秘钥key
      */
     public String wxAppPayResult(HttpServletRequest request, HttpServletResponse response) throws Exception {
-        //去空
-        Map<String, String> notifyMap = PayUtil.paraFilter(JsonUtils.toObject(IOUtils.toString(request.getInputStream()), Map.class));
-        log.info("【微信回调】: {}", new Gson().toJson(notifyMap));
+        //接收xml
+        ServletInputStream inputStream = request.getInputStream();
+        String notifyXml = IOUtils.toString(inputStream, "utf-8");
+        Map<String, String> notifyMap = JsonUtils.toObject(notifyXml, Map.class);
+        String sign = notifyMap.get("sign");
+        log.info("【微信回调】: {}", notifyMap);
+        notifyMap = PayUtil.paraFilter(notifyMap);
         Map<String, String> returnMap = new HashMap<>();
-        returnMap.put("return_code", "FAIL");
-        returnMap.put("return_msg", "");
         if ("SUCCESS".equals(notifyMap.get("result_code")) && "SUCCESS".equals(notifyMap.get("return_code"))) {
             String orderId = notifyMap.get("out_trade_no");
-            log.info("【订单ID】: {}", orderId);
             Optional<UserOrder> optional = userOrderRepository.findById(Long.parseLong(orderId));
             if (optional.isPresent()) {
                 UserOrder userOrder = optional.get();
-                String orderMetaData = userOrder.getOrderMetaData();
-                JSONObject metaData = new JSONObject(orderMetaData);
-                String sign = metaData.getString("sign");
-                log.info("【sign】: {}", sign);
                 String total_fee = notifyMap.get("total_fee");
                 int retval = userOrder.getTotalFee().compareTo(new BigDecimal(total_fee));
-                log.info("【retval】: {} : userOrder , {} , total_fee : {}", retval, userOrder.getTotalFee(), total_fee);
-                //校验sign,金额 todo 1 对比 1.00
-                //if (WXPayUtil.isSignatureValid(notifyXml, sign) && userOrder.getTotalFee().toString().equals(total_fe;)) {
-                //对比秘钥key
-                boolean flag = PayUtil.verify(PayUtil.createLinkString(notifyMap), sign, opMchkey, "UTF-8");
-                log.info("【WXPayUtil.isSignatureValid】: {}", flag);
-                if (flag && retval == 0) {
-                    //接口幂等,未支付
-                    if (userOrder.getOrderPayStatus() == 0) {
-                        //更新订单状态
-                        userOrder.setOrderPayStatus(1);
-                        //添加用户余额,获取当前充值人
-                        String userId = userOrder.getUserId();
-                        User user = userRepository.findById(Integer.valueOf(userId)).orElseGet(User::new);
-                        if (ObjectUtils.isNotEmpty(user)) {
-                            orderShip(user, userOrder);
+                log.info("【retval】: {} : 【userOrder】 , {} , 【total_fee】 : {} ,【orderPayStatus】 : {} ,【sign】: {} ,【订单ID】: {}", retval, userOrder.getTotalFee(), total_fee, userOrder.getOrderPayStatus(), sign, orderId);
+                //转换
+                String stringA = PayUtil.createLinkString(notifyMap);
+                //拼接API密钥
+                String signResult = PayUtil.sign(stringA,opMchkey,"UTF-8").toUpperCase();
+                //对比
+                //boolean flag = PayUtil.verify(signResult, sign, opMchkey, "UTF-8");
+                if (sign.equals(signResult)){
+                //if (flag) {
+                    //todo 测试对比 retval为 0, 线上更新为订单原始价格 retval == total_fee
+                    if (retval == 0) {
+                        if (userOrder.getOrderPayStatus() == 0) {
+                            //更新订单状态
+                            userOrder.setOrderPayStatus(1);
+                            //添加用户余额,获取当前充值人
+                            String userId = userOrder.getUserId();
+                            User user = userRepository.findById(Integer.valueOf(userId)).orElseGet(User::new);
+                            if (ObjectUtils.isNotEmpty(user)) {
+                                //添加余额
+                                orderShip(user, userOrder);
+                            }
+                            //设置响应对象
+                            returnMap.put("return_code", "SUCCESS");
+                            returnMap.put("return_msg", "OK");
+                            String returnXml = WXPayUtil.mapToXml(returnMap);
+                            response.setContentType("text/xml");
+                            return returnXml;
                         }
-                        //设置响应对象
-                        returnMap.put("return_code", "SUCCESS");
-                        returnMap.put("return_msg", "OK");
-                        String returnXml = WXPayUtil.mapToXml(returnMap);
-                        response.setContentType("text/xml");
-                        return returnXml;
                     }
                 }
             }
         }
-
+        returnMap.put("return_code", "FAIL");
+        returnMap.put("return_msg", "");
         String returnXml = WXPayUtil.mapToXml(returnMap);
         response.setContentType("text/xml");
         log.warn("校验失败");
@@ -349,7 +353,6 @@ public class UserPayRecordService {
         Integer orderPayStatus = userOrder.getOrderPayStatus();
         Integer orderShipStatus = userOrder.getOrderShipStatus();
         PayStatus orderStatus = userOrder.getOrderStatus();
-
         try {
             if (orderStatus == PayStatus.topaid || orderShipStatus == 1) {
                 userOrder.setOrderStatus(PayStatus.topaid);

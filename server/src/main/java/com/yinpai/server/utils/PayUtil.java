@@ -34,12 +34,12 @@ public class PayUtil {
      *      * @param key 密钥
      *      * @param input_charset 编码格式
      *      * @return 签名结果
-     *      
+     *
      */
     public static boolean verify(String text, String sign, String key, String input_charset) {
         text = text + key;
-        String mysign = DigestUtils.md5Hex(getContentBytes(text, input_charset));
-        if (mysign.equals(sign)) {
+        //String mysign = DigestUtils.md5Hex(getContentBytes(text, input_charset)).toUpperCase();
+        if (text.equals(sign)) {
             return true;
         } else {
             return false;
@@ -125,7 +125,7 @@ public class PayUtil {
      *      
      */
     public static String httpRequest(String requestUrl, String requestMethod, String outputStr) {
-// 创建SSLContext
+        // 创建SSLContext
         StringBuffer buffer = null;
         try {
             URL url = new URL(requestUrl);
