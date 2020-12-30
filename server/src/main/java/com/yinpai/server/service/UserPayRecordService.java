@@ -3,7 +3,6 @@ package com.yinpai.server.service;
 import com.alipay.api.AlipayApiException;
 import com.alipay.api.internal.util.AlipaySignature;
 import com.github.wxpay.sdk.WXPayUtil;
-import com.google.gson.Gson;
 import com.yinpai.server.domain.dto.LoginUserInfoDto;
 import com.yinpai.server.domain.dto.PageResponse;
 import com.yinpai.server.domain.dto.fiter.BaseFilterDto;
