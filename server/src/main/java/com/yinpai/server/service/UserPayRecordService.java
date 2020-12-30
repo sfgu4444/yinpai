@@ -33,8 +33,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.net.ssl.*;
-import javax.security.auth.login.LoginException;
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -42,11 +40,8 @@ import java.io.*;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.net.URLConnection;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 
-import static java.util.Calendar.MINUTE;
-import static java.util.Calendar.getInstance;
 
 /**
  * @author weilai
@@ -101,11 +96,6 @@ public class UserPayRecordService {
     private String opMchkey;
 
 
-    /**
-     * 1:去空
-     * 2:拼接
-     * 3:加入秘钥key
-     */
     public String wxAppPayResult(HttpServletRequest request, HttpServletResponse response) throws Exception {
         //接收xml
         ServletInputStream is = request.getInputStream();
@@ -248,10 +238,8 @@ public class UserPayRecordService {
     public String AliPayAppPayResult(HttpServletRequest request) {
         //调用SDK验证签名
         boolean signVerified = false;
-        String json = RequestUtils.getJson(request);
-        Map requestParams = JsonUtils.toObject(json, Map.class);
-        log.info("接收回调数据成功{}", requestParams);
-        Map<String, String> map = convertParamsToMap(requestParams);
+        Map<String, String> map = convertParamsToMap(JsonUtils.toObject(RequestUtils.getJson(request), Map.class));
+        log.info("接收回调数据成功{}", map);
         try {
             //验签
             signVerified = AlipaySignature.rsaCheckV1(
@@ -280,7 +268,7 @@ public class UserPayRecordService {
                 return "success";
             }
         } else {
-            log.warn("交易失败,原因:" + requestParams.get("msg"));
+            log.warn("交易失败,原因:" + map.get("msg"));
             return "failure";
         }
         return "failure";
