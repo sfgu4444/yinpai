@@ -23,8 +23,6 @@ import com.yinpai.server.vo.PayRecordListVo;
 import com.yinpai.server.vo.WxPay.PayResultVo;
 import com.yinpai.server.vo.WxPay.WxPayResult;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
