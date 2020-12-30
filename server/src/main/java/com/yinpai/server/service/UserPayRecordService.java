@@ -113,7 +113,7 @@ public class UserPayRecordService {
         BufferedReader reader = new BufferedReader(new InputStreamReader(is));
         StringBuilder sb = new StringBuilder();
         String line = null;
-        String resXml="";
+        String resXml = "";
         try {
             while ((line = reader.readLine()) != null) {
                 sb.append(line + "\n");
@@ -127,8 +127,8 @@ public class UserPayRecordService {
                 log.error("数据转换异常", e);
             }
         }
-        resXml=sb.toString();
-        log.info("【微信回调】: {}",resXml);
+        resXml = sb.toString();
+        log.info("【微信回调】: {}", resXml);
         Map<String, String> notifyMap = WXPayUtil.xmlToMap(resXml);
         String sign = notifyMap.get("sign");
         notifyMap = PayUtil.paraFilter(notifyMap);
@@ -138,19 +138,21 @@ public class UserPayRecordService {
             Optional<UserOrder> optional = userOrderRepository.findById(Long.parseLong(orderId));
             if (optional.isPresent()) {
                 UserOrder userOrder = optional.get();
+                log.info("索取订单数据:{}", userOrder);
                 String total_fee = notifyMap.get("total_fee");
                 int retval = userOrder.getTotalFee().compareTo(new BigDecimal(total_fee));
                 log.info("【retval】: {} : 【userOrder】 , {} , 【total_fee】 : {} ,【orderPayStatus】 : {} ,【sign】: {} ,【订单ID】: {}", retval, userOrder.getTotalFee(), total_fee, userOrder.getOrderPayStatus(), sign, orderId);
                 //转换
                 String stringA = PayUtil.createLinkString(notifyMap);
                 //拼接API密钥
-                String signResult = PayUtil.sign(stringA,opMchkey,"UTF-8").toUpperCase();
+                String signResult = PayUtil.sign(stringA, opMchkey, "UTF-8").toUpperCase();
                 //对比
                 //boolean flag = PayUtil.verify(signResult, sign, opMchkey, "UTF-8");
-                if (sign.equals(signResult)){
-                //if (flag) {
+                if (sign.equals(signResult)) {
+                    //if (flag) {
                     //todo 测试对比 retval为 0, 线上更新为订单原始价格 retval == total_fee
                     if (retval == 0) {
+                        log.info("订单状态:{}", userOrder.getOrderPayStatus());
                         if (userOrder.getOrderPayStatus() == 0) {
                             //更新订单状态
                             userOrder.setOrderPayStatus(1);
@@ -166,6 +168,7 @@ public class UserPayRecordService {
                             returnMap.put("return_msg", "OK");
                             String returnXml = WXPayUtil.mapToXml(returnMap);
                             response.setContentType("text/xml");
+                            log.warn(user.getUsername(), "用户充值成功");
                             return returnXml;
                         }
                     }
