@@ -111,11 +111,29 @@ public class UserPayRecordService {
      */
     public String wxAppPayResult(HttpServletRequest request, HttpServletResponse response) throws Exception {
         //接收xml
-        ServletInputStream inputStream = request.getInputStream();
-        String notifyXml = IOUtils.toString(inputStream, "utf-8");
-        Map<String, String> notifyMap = JsonUtils.toObject(notifyXml, Map.class);
+        ServletInputStream is = request.getInputStream();
+        //将InputStream转换成String
+        BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+        StringBuilder sb = new StringBuilder();
+        String line = null;
+        String resXml="";
+        try {
+            while ((line = reader.readLine()) != null) {
+                sb.append(line + "\n");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                is.close();
+            } catch (IOException e) {
+                log.error("数据转换异常", e);
+            }
+        }
+        resXml=sb.toString();
+        log.info("【微信回调】: {}",resXml);
+        Map<String, String> notifyMap = WXPayUtil.xmlToMap(resXml);
         String sign = notifyMap.get("sign");
-        log.info("【微信回调】: {}", notifyMap);
         notifyMap = PayUtil.paraFilter(notifyMap);
         Map<String, String> returnMap = new HashMap<>();
         if ("SUCCESS".equals(notifyMap.get("result_code")) && "SUCCESS".equals(notifyMap.get("return_code"))) {
