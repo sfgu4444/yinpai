@@ -24,6 +24,7 @@ import com.yinpai.server.vo.PayRecordListVo;
 import com.yinpai.server.vo.WxPay.PayResultVo;
 import com.yinpai.server.vo.WxPay.WxPayResult;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
@@ -98,37 +99,41 @@ public class UserPayRecordService {
     @Autowired
     private UserRepository userRepository;
 
+    @Value("${wechat.opMchkey}")
+    private String opMchkey;
+
+
+    /**
+     * 1:去空
+     * 2:拼接
+     * 3:加入秘钥key
+     */
     public String wxAppPayResult(HttpServletRequest request, HttpServletResponse response) throws Exception {
-        //获得通知结果
-        ServletInputStream inputStream = request.getInputStream();
-        String notifyXml = StreamUtils.inputStream2String(inputStream, "utf-8");
-        Map<String, String> notifyMap = WXPayUtil.xmlToMap(notifyXml);
-        log.info("【微信回调】: {}",new Gson().toJson(notifyMap));
+        //去空
+        Map<String, String> notifyMap = PayUtil.paraFilter(JsonUtils.toObject(IOUtils.toString(request.getInputStream()), Map.class));
+        log.info("【微信回调】: {}", new Gson().toJson(notifyMap));
         Map<String, String> returnMap = new HashMap<>();
         returnMap.put("return_code", "FAIL");
         returnMap.put("return_msg", "");
-
         if ("SUCCESS".equals(notifyMap.get("result_code")) && "SUCCESS".equals(notifyMap.get("return_code"))) {
-            //获取签名
             String orderId = notifyMap.get("out_trade_no");
-            log.info("【订单ID】: {}",orderId);
+            log.info("【订单ID】: {}", orderId);
             Optional<UserOrder> optional = userOrderRepository.findById(Long.parseLong(orderId));
-
             if (optional.isPresent()) {
                 UserOrder userOrder = optional.get();
                 String orderMetaData = userOrder.getOrderMetaData();
                 JSONObject metaData = new JSONObject(orderMetaData);
                 String sign = metaData.getString("sign");
-                log.info("【sign】: {}",sign);
+                log.info("【sign】: {}", sign);
                 String total_fee = notifyMap.get("total_fee");
                 int retval = userOrder.getTotalFee().compareTo(new BigDecimal(total_fee));
-                log.info("【retval】: {} : userOrder , {} , total_fee : {}",retval,userOrder.getTotalFee(),total_fee);
+                log.info("【retval】: {} : userOrder , {} , total_fee : {}", retval, userOrder.getTotalFee(), total_fee);
                 //校验sign,金额 todo 1 对比 1.00
                 //if (WXPayUtil.isSignatureValid(notifyXml, sign) && userOrder.getTotalFee().toString().equals(total_fe;)) {
-
-                Boolean flag = WXPayUtil.isSignatureValid(notifyXml, sign);
-                log.info("【WXPayUtil.isSignatureValid】: {}",flag);
-                if (flag && retval ==0) {
+                //对比秘钥key
+                boolean flag = PayUtil.verify(PayUtil.createLinkString(notifyMap), sign, opMchkey, "UTF-8");
+                log.info("【WXPayUtil.isSignatureValid】: {}", flag);
+                if (flag && retval == 0) {
                     //接口幂等,未支付
                     if (userOrder.getOrderPayStatus() == 0) {
                         //更新订单状态
@@ -231,7 +236,7 @@ public class UserPayRecordService {
             }
         } else {
             // TODO 验签失败则记录异常日志，并在response中返回failure.
-            log.warn("交易失败,原因:"+map.get("msg"));
+            log.warn("交易失败,原因:" + map.get("msg"));
             return "failure";
         }
         return "failure";
@@ -242,15 +247,15 @@ public class UserPayRecordService {
 
     public PayResultVo appleOrderDetermine(Map<String, Object> map) throws JSONException {
         LoginUserInfoDto loginUserInfoDto = LoginUserThreadLocal.get();
-        if(null == loginUserInfoDto) throw new NotLoginException("用户必须登录!");
+        if (null == loginUserInfoDto) throw new NotLoginException("用户必须登录!");
 
         PayResultVo payResultVo = new PayResultVo();
         String str = JsonUtils.toJsonString(map);
         System.out.println(str);
         //String verifyResult = IosVerifyUtil.buyAppVerify(payload, 1);
         //String bs = Base64Utils.encode(str.getBytes());
-        JSONObject appleResultJSON = new JSONObject(IosVerifyUtil.buyAppVerify(boxurl,str));
-        log.info("【苹果验证结果】: 【{}】",appleResultJSON);
+        JSONObject appleResultJSON = new JSONObject(IosVerifyUtil.buyAppVerify(boxurl, str));
+        log.info("【苹果验证结果】: 【{}】", appleResultJSON);
         //JSONObject appleResultJSON = new JSONObject(sendPost(boxurl, str));
         // todo 没有这个参数
         String status = appleResultJSON.getString("status");
@@ -280,7 +285,7 @@ public class UserPayRecordService {
             payResultVo.setCode(200);
             payResultVo.setMsg("充值成功!");
 
-        }else {
+        } else {
             payResultVo.setCode(400);
             payResultVo.setMsg("充值失败!");
         }
@@ -314,50 +319,48 @@ public class UserPayRecordService {
             String line;
             sb = new StringBuilder();
 
-            while ((line = in.readLine()) != null)
-            {
+            while ((line = in.readLine()) != null) {
                 sb.append(line);
             }
             return JsonUtils.toObject(sb.toString(), Map.class);
         } catch (Exception e) {
-            log.warn("发送 POST 请求出现异常！"+e);
+            log.warn("发送 POST 请求出现异常！" + e);
             throw new RuntimeException("调用苹果");
         }
         //使用finally块来关闭输出流、输入流
-        finally{
-            try{
-                if(out!=null){
+        finally {
+            try {
+                if (out != null) {
                     out.close();
                 }
-                if(in!=null){
+                if (in != null) {
                     in.close();
                 }
-            }
-            catch(IOException ex){
-                log.warn("发送 POST 请求出现异常！"+ex);
+            } catch (IOException ex) {
+                log.warn("发送 POST 请求出现异常！" + ex);
                 throw new RuntimeException("调用苹果");
             }
         }
     }
 
 
-    private UserOrder orderShip(User user,UserOrder userOrder){
+    private UserOrder orderShip(User user, UserOrder userOrder) {
         BigDecimal totalFee = userOrder.getTotalFee();
         Integer orderPayStatus = userOrder.getOrderPayStatus();
         Integer orderShipStatus = userOrder.getOrderShipStatus();
         PayStatus orderStatus = userOrder.getOrderStatus();
 
-        try{
-            if (orderStatus == PayStatus.topaid || orderShipStatus == 1){
+        try {
+            if (orderStatus == PayStatus.topaid || orderShipStatus == 1) {
                 userOrder.setOrderStatus(PayStatus.topaid);
-            }else if (orderPayStatus == 1){
+            } else if (orderPayStatus == 1) {
                 // TODO: 2020/12/14  乐观锁
                 addUserMoney(user, totalFee.divide(new BigDecimal(100)));
                 userOrder.setOrderShipStatus(1);
                 userOrder.setOrderStatus(PayStatus.topaid);
                 userOrder.setTimeExpire(DateUtil.getMMDDYYHHMMSS(new Date()));
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             log.warn("订单发货时异常: " + userOrder);
             throw new RuntimeException("订单发货时异常");
         }

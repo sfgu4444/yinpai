@@ -251,7 +251,6 @@ public class UserPayService {
         orderRequest.setTimeStart(timeFormat.format(new Date()));
         //交易结束时间
         orderRequest.setTimeExpire(timeFormat.format(expire.getTime()));
-        //{"sign", "prepayId", "partnerId", "appId", "packageValue", "timeStamp", "nonceStr"}
         try {
             WxPayAppOrderResult wxPayAppOrderResult = wxPayService.createOrder(orderRequest);
             //todo 生成订单信息
@@ -267,13 +266,11 @@ public class UserPayService {
                     .orderPayStatus(0)
                     .orderShipStatus(0)
                     .orderStatus(PayStatus.unpaid)
-//                    .partnerId(wxPayAppOrderResult.getPartnerId())
                     .timeStamp(wxPayAppOrderResult.getTimeStamp())
                     .orderMetaData("{\"sign\":\"" + wxPayAppOrderResult.getSign() + "\"}").build();
-//                    .payStatus(PayStatus.unpaid)
-//                    .nonceStr(wxPayAppOrderResult.getNonceStr())
-//                    .sign().build();
             save(userOrder);
+            //todo 二次加密
+
             return wxPayAppOrderResult;
         } catch (WxPayException e) {
             // TODO

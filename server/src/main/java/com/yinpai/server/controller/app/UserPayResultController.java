@@ -34,7 +34,6 @@ public class UserPayResultController {
     @PostMapping("/callbackWxAppPay")
     //@WebLog(description = "供微信平台回调")
     public String wxAppPayResult(HttpServletRequest request, HttpServletResponse response) throws Exception {
-        System.out.println("【微信平台回调】");
         return userPayRecordService.wxAppPayResult(request,response);
     }
 
