@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.Map;
 
 /**
@@ -40,7 +41,7 @@ public class UserPayResultController {
     @ApiOperation("供支付宝平台回调")
     @PostMapping("/callbackAlipayApp")
     //@WebLog(description = "供支付宝平台回调")
-    public String AliPayAppPayResult(HttpServletRequest request){
+    public String AliPayAppPayResult(HttpServletRequest request) throws IOException {
         return userPayRecordService.AliPayAppPayResult(request);
     }
 

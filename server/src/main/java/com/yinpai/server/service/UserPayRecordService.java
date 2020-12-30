@@ -3,6 +3,7 @@ package com.yinpai.server.service;
 import com.alipay.api.AlipayApiException;
 import com.alipay.api.internal.util.AlipaySignature;
 import com.github.wxpay.sdk.WXPayUtil;
+import com.google.gson.Gson;
 import com.yinpai.server.domain.dto.LoginUserInfoDto;
 import com.yinpai.server.domain.dto.PageResponse;
 import com.yinpai.server.domain.dto.fiter.BaseFilterDto;
@@ -212,7 +213,7 @@ public class UserPayRecordService {
     private String signType;
 
     // 将request中的参数转换成Map
-    private static Map<String, String> convertParamsToMap(Map requestParams) {
+    private  Map<String, String> convertParamsToMap(Map requestParams) {
         Map<String, String> retMap = new HashMap<String, String>();
         Set<Map.Entry<String, List>> entrySet = requestParams.entrySet();
         for (Map.Entry<String, List> entry : entrySet) {
@@ -235,11 +236,11 @@ public class UserPayRecordService {
     }
 
     //支付宝回调接口
-    public String AliPayAppPayResult(HttpServletRequest request) {
+    public String AliPayAppPayResult(HttpServletRequest request) throws IOException {
+        Map<String, String> map = convertRequestParamsToMap(request);
+        log.info("【支付宝结果回调】 {}", new Gson().toJson(map));
         //调用SDK验证签名
         boolean signVerified = false;
-        Map<String, String> map = convertParamsToMap(JsonUtils.toObject(RequestUtils.getJson(request), Map.class));
-        log.info("接收回调数据成功{}", map);
         try {
             //验签
             signVerified = AlipaySignature.rsaCheckV1(
@@ -254,6 +255,7 @@ public class UserPayRecordService {
         String trade_status = map.get("trade_status");
         String out_trade_no = map.get("out_trade_no");
         // 签名校验
+        log.info("【签名校验】 {}",signVerified);
         if (signVerified) {
             if ("TRADE_SUCCESS".equals(trade_status) || "TRADE_FINISHED".equals(trade_status)) {
                 Optional<UserOrder> optional = userOrderRepository.findById(Long.valueOf(out_trade_no));
@@ -398,4 +400,26 @@ public class UserPayRecordService {
         return userOrderRepository.save(userOrder);
     }
 
+    public  Map<String, String> convertRequestParamsToMap(HttpServletRequest request) {
+        Map<String, String> retMap = new HashMap<String, String>();
+        Set<Map.Entry<String, String[]>> entrySet = request.getParameterMap().entrySet();
+        for (Map.Entry<String, String[]> entry : entrySet) {
+            String name = entry.getKey();
+            String[] values = entry.getValue();
+            int valLen = values.length;
+            if (valLen == 1) {
+                retMap.put(name, values[0]);
+            } else if (valLen > 1) {
+                StringBuilder sb = new StringBuilder();
+                for (String val : values) {
+                    sb.append(",").append(val);
+                }
+                retMap.put(name, sb.toString().substring(1));
+            } else {
+                retMap.put(name, "");
+            }
+        }
+
+        return retMap;
+    }
 }
