@@ -17,10 +17,8 @@ public class RequestUtils {
             String inputStr;
             while ((inputStr = streamReader.readLine()) != null)
                 responseStrBuilder.append(inputStr);
-
             JSONObject jsonObject = JSONObject.parseObject(responseStrBuilder.toString());
             param = jsonObject.toJSONString();
-            System.out.println(param);
         } catch (Exception e) {
             e.printStackTrace();
         }

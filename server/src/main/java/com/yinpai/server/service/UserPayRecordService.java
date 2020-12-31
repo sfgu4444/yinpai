@@ -31,6 +31,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,6 +43,9 @@ import java.math.BigDecimal;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.*;
+
+import static java.util.Calendar.MINUTE;
+import static java.util.Calendar.getInstance;
 
 
 /**
@@ -214,7 +218,7 @@ public class UserPayRecordService {
 
     // 将request中的参数转换成Map
     private  Map<String, String> convertParamsToMap(Map requestParams) {
-        Map<String, String> retMap = new HashMap<String, String>();
+        Map<String, String> retMap = new HashMap();
         Set<Map.Entry<String, List>> entrySet = requestParams.entrySet();
         for (Map.Entry<String, List> entry : entrySet) {
             String name = entry.getKey();
@@ -273,110 +277,70 @@ public class UserPayRecordService {
             log.warn("交易失败,原因:" + map.get("msg"));
             return "failure";
         }
+        log.warn("交易失败,原因:" + map.get("msg"));
         return "failure";
     }
 
-    @Value("${applepay.boxurl}")
-    private String boxurl;
+
+
+    /*  status
+     * 0 SUCCESS
+     * 21000 App Store不能读取你提供的JSON对象
+     * 21002 receipt-data域的数据有问题
+     * 21003 receipt无法通过验证
+     * 21004 提供的shared secret不匹配你账号中的shared secret
+     * 21005 receipt服务器当前不可用
+     * 21006 receipt合法，但是订阅已过期。服务器接收到这个状态码时，receipt数据仍然会解码并一起发送
+     * 21007 receipt是Sandbox receipt，但却发送至生产系统的验证服务
+     * 21008 receipt是生产receipt，但却发送至Sandbox环境的验证服务
+     */
 
     public PayResultVo appleOrderDetermine(Map<String, Object> map) throws JSONException {
         LoginUserInfoDto loginUserInfoDto = LoginUserThreadLocal.get();
-        if (null == loginUserInfoDto) throw new NotLoginException("用户必须登录!");
-
+        if (null == loginUserInfoDto) {/*throw new NotLoginException("用户必须登录!")*/}
+        ;
         PayResultVo payResultVo = new PayResultVo();
-        String str = JsonUtils.toJsonString(map);
-        System.out.println(str);
-        //String verifyResult = IosVerifyUtil.buyAppVerify(payload, 1);
-        //String bs = Base64Utils.encode(str.getBytes());
-        JSONObject appleResultJSON = new JSONObject(IosVerifyUtil.buyAppVerify(boxurl, str));
-        log.info("【苹果验证结果】: 【{}】", appleResultJSON);
-        //JSONObject appleResultJSON = new JSONObject(sendPost(boxurl, str));
-        // todo 没有这个参数
-        String status = appleResultJSON.getString("status");
-        if (status.equals("0"))
-        //创建订单
-        {
-//            String totalFee = map.get("totalFee").toString();
-//            System.out.println(totalFee);
-//            //String timeStart = appleResultJSON.getJSONObject("receipt").getString("receipt_creation_date_ms");
-//            UserOrder userOrder = UserOrder.builder()
-//                    .orderId(Long.valueOf(map.get("OrderId").toString()))
-//                    .userId(loginUserInfoDto.getUserId() + "")
-//                    .body("收集宝")
-//                    // TODO: 2020/12/14 苹果订单金额单位 未知  订单内单位是分
-//                    .totalFee(new BigDecimal(1))
-//                    .ipAddress(ProjectUtil.getIpAddr())
-//                    .payPlatform("ApplePay")
-//                    .timeStart(DateUtil.getMMDDYYHHMMSS(new Date()))
-//                    .timeExpire(DateUtil.getMMDDYYHHMMSS(new Date()))
-//                    .timeStamp(System.currentTimeMillis()+"")
-//                    .orderPayStatus(0)
-//                    .orderShipStatus(0)
-//                    .orderStatus(PayStatus.unpaid)
-//                    .build();
-//            userOrderRepository.save(userOrder);
-
-            payResultVo.setCode(200);
-            payResultVo.setMsg("充值成功!");
-
+        Integer statusFont = (Integer) map.get("status");
+        if (0 != statusFont) {
+            throw new RuntimeException("status 参数传递有误!!!!");
+        }
+        String receipt = JsonUtils.toJsonString(map);
+        String environment = (String) map.get("environment");
+        JSONObject appleResultJSON = null;
+        if (environment.equals("Sandbox")) {
+            appleResultJSON = new JSONObject(IosVerifyUtil.buyAppVerify(receipt, 0));
         } else {
-            payResultVo.setCode(400);
-            payResultVo.setMsg("充值失败!");
+            appleResultJSON = new JSONObject(IosVerifyUtil.buyAppVerify(receipt, 1));
+        }
+        log.info("【苹果验证结果】: 【{}】", appleResultJSON);
+        String status = appleResultJSON.getString("status");
+        if ("0".equals(status)) {
+            Calendar expire = getInstance();
+            expire.add(MINUTE, 10);
+            UserOrder userOrder = UserOrder.builder()
+                    //.orderId(orderId)
+                    .userId(loginUserInfoDto.getUserId() + "")
+                    .body("收集宝")
+                    // TODO: 2020/12/14 支付宝订单金额单位是元  订单内是分  (需要*100转换)
+                    .totalFee(new BigDecimal(1))
+                    .ipAddress(ProjectUtil.getIpAddr())
+                    .payPlatform("APPLE")
+                    .timeStart(DateUtil.getMMDDYYHHMMSS(new Date()))
+                    .timeExpire(DateUtil.getMMDDYYHHMMSS(expire.getTime()))
+                    .timeStamp(System.currentTimeMillis() + "")
+                    .orderPayStatus(1)
+                    .orderShipStatus(1)
+                    .orderStatus(PayStatus.topaid)
+                    .build();
+            userOrderRepository.save(userOrder);
+            payResultVo.setCode(HttpStatus.OK);
+            payResultVo.setMsg("充值成功!");
+        } else {
+            payResultVo.setCode(HttpStatus.INTERNAL_SERVER_ERROR);
+            payResultVo.setMsg(status);
         }
         return payResultVo;
-
     }
-
-    private Map sendPost(String url, String param) {
-        StringBuilder sb = null;
-        PrintWriter out = null;
-        BufferedReader in = null;
-        try {
-            URL realUrl = new URL(url);
-            // 打开和URL之间的连接
-            URLConnection conn = realUrl.openConnection();
-            // 设置通用的请求属性
-            conn.setRequestProperty("accept", "*/*");
-            conn.setRequestProperty("connection", "Keep-Alive");
-            conn.setRequestProperty("user-agent", "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1;SV1)");
-            // 发送POST请求必须设置如下两行
-            conn.setDoOutput(true);
-            conn.setDoInput(true);
-            // 获取URLConnection对象对应的输出流
-            out = new PrintWriter(conn.getOutputStream());
-            // 发送请求参数
-            out.print("{\"receipt-data\": \"" + param + "\"}");
-            // flush输出流的缓冲
-            out.flush();
-            // 定义BufferedReader输入流来读取URL的响应
-            in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-            String line;
-            sb = new StringBuilder();
-
-            while ((line = in.readLine()) != null) {
-                sb.append(line);
-            }
-            return JsonUtils.toObject(sb.toString(), Map.class);
-        } catch (Exception e) {
-            log.warn("发送 POST 请求出现异常！" + e);
-            throw new RuntimeException("调用苹果");
-        }
-        //使用finally块来关闭输出流、输入流
-        finally {
-            try {
-                if (out != null) {
-                    out.close();
-                }
-                if (in != null) {
-                    in.close();
-                }
-            } catch (IOException ex) {
-                log.warn("发送 POST 请求出现异常！" + ex);
-                throw new RuntimeException("调用苹果");
-            }
-        }
-    }
-
 
     private UserOrder orderShip(User user, UserOrder userOrder) {
         BigDecimal totalFee = userOrder.getTotalFee();
