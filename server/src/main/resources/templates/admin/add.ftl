@@ -6,7 +6,7 @@
     <form class="layui-form">
         <div class="layui-form-item">
             <label for="adminName" class="layui-form-label">
-                <span class="x-red">*</span>用户名
+                <span class="x-red">*</span>账号
             </label>
             <div class="layui-input-inline">
                 <input type="text" id="adminName" name="adminName" required="" lay-verify="required" autocomplete="off" class="layui-input" placeholder="请输入用户名">
@@ -42,7 +42,7 @@
 
         <div class="layui-form-item">
             <label for="nickName" class="layui-form-label">
-                <span class="x-red">*</span>昵称
+                <span class="x-red">*</span>用户名
             </label>
             <div class="layui-input-inline">
                 <input type="text" id="nickName" name="nickName" required="" lay-verify="required" autocomplete="off" class="layui-input" placeholder="请输入昵称">
@@ -75,7 +75,9 @@
                 </div>
             </div>
         </div>
+<!--
 
+2021 - 1-1 注释掉
         <div class="layui-form-item">
             <label for="monthPayPrice" class="layui-form-label">
                 月付价格
@@ -111,7 +113,7 @@
                 不填表示不支持此方式
             </div>
         </div>
-
+-->
         <div class="layui-form-item">
             <label for="L_repass" class="layui-form-label">
             </label>

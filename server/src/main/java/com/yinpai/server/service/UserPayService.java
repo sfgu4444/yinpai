@@ -7,7 +7,6 @@ import com.alipay.api.domain.AlipayTradeAppPayModel;
 import com.alipay.api.request.AlipayTradeAppPayRequest;
 import com.alipay.api.response.AlipayTradeAppPayResponse;
 import com.github.binarywang.wxpay.bean.order.WxPayAppOrderResult;
-import com.github.binarywang.wxpay.bean.request.BaseWxPayRequest;
 import com.github.binarywang.wxpay.bean.request.WxPayUnifiedOrderRequest;
 import com.github.binarywang.wxpay.config.WxPayConfig;
 import com.github.binarywang.wxpay.exception.WxPayException;
@@ -20,6 +19,7 @@ import com.yinpai.server.domain.entity.*;
 import com.yinpai.server.domain.entity.admin.Admin;
 import com.yinpai.server.domain.repository.UserOrderRepository;
 import com.yinpai.server.domain.repository.UserPayRepository;
+import com.yinpai.server.domain.repository.admin.AdminRepository;
 import com.yinpai.server.enums.PayStatus;
 import com.yinpai.server.exception.NotAcceptableException;
 import com.yinpai.server.exception.NotLoginException;
@@ -27,12 +27,10 @@ import com.yinpai.server.exception.ProjectException;
 import com.yinpai.server.thread.threadlocal.LoginUserThreadLocal;
 import com.yinpai.server.utils.DateUtil;
 import com.yinpai.server.utils.IdWorker;
-import com.yinpai.server.utils.JsonUtils;
 import com.yinpai.server.utils.ProjectUtil;
 import com.yinpai.server.vo.AdminPayMethodVo;
-import lombok.Data;
+import com.yinpai.server.vo.admin.AdminAddForm;
 import lombok.extern.slf4j.Slf4j;
-import org.bouncycastle.util.IPAddress;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -42,8 +40,6 @@ import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Map;
-import java.util.UUID;
 
 import static java.util.Calendar.MINUTE;
 import static java.util.Calendar.getInstance;
@@ -72,8 +68,10 @@ public class UserPayService {
 
     private final UserPayRecordService userPayRecordService;
 
+    private final AdminRepository adminRepository;
+
     @Autowired
-    public UserPayService(UserPayRepository userPayRepository, UserService userService, WorksService worksService, AdminService adminService, WechatConfig wechatConfig, AlipayConfig alipayConfig, @Lazy UserPayRecordService userPayRecordService) {
+    public UserPayService(UserPayRepository userPayRepository, UserService userService, WorksService worksService, AdminService adminService, WechatConfig wechatConfig, AlipayConfig alipayConfig, @Lazy UserPayRecordService userPayRecordService, AdminRepository adminRepository) {
         this.userPayRepository = userPayRepository;
         this.userService = userService;
         this.worksService = worksService;
@@ -81,6 +79,7 @@ public class UserPayService {
         this.wechatConfig = wechatConfig;
         this.alipayConfig = alipayConfig;
         this.userPayRecordService = userPayRecordService;
+        this.adminRepository = adminRepository;
     }
 
     public boolean isPayWork(Integer workId, Integer adminId, Integer userId) {
@@ -130,6 +129,9 @@ public class UserPayService {
         userPayRecord.setMoney(works.getPrice());
         userPayRecord.setCreateTime(new Date());
         userPayRecordService.save(userPayRecord);
+        Admin admin = adminService.findByIdNotNull(works.getAdminId());
+        admin.setMoney(admin.getMoney()+works.getPrice());
+        adminRepository.save(admin);
     }
 
     public void userPayAdmin(Integer adminId, String type, Integer amount) {
@@ -192,6 +194,8 @@ public class UserPayService {
         userPayRecord.setMoney(price);
         userPayRecord.setCreateTime(new Date());
         userPayRecordService.save(userPayRecord);
+        admin.setMoney(admin.getMoney()+price);
+        adminRepository.save(admin);
     }
 
     public AdminPayMethodVo adminPayMethod(Integer adminId) {

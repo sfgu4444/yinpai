@@ -48,4 +48,6 @@ public class Admin{
 
     private Date updateTime = new Date();
 
+    private Integer money;
+
 }

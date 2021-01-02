@@ -30,6 +30,7 @@
             <th>账号</th>
             <th>昵称</th>
             <th>头像</th>
+            <th>余额</th>
             <th>月付价格</th>
             <th>季付价格</th>
             <th>年付价格</th>
@@ -47,6 +48,7 @@
                 <td>${v.adminName}</td>
                 <td>${v.nickName}</td>
                 <td><img width="100" src="${v.avatarUrl}" alt="${v.avatarUrl}"></td>
+                <td>${v.money}</td>
                 <td>${v.monthPayPrice!'-'}</td>
                 <td>${v.quarterPayPrice!'-'}</td>
                 <td>${v.yearPayPrice!'-'}</td>

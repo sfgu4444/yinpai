@@ -422,4 +422,8 @@ public class UserPayRecordService {
 
         return retMap;
     }
+
+    public List<UserPayRecord> getAdminPayMoneyList(){
+        return userPayRecordRepository.findAll();
+    }
 }
