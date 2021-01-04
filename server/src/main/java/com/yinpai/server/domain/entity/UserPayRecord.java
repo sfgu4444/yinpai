@@ -21,7 +21,11 @@ public class UserPayRecord {
 
     private Integer userId;
 
+    private String userName;
+
     private Integer adminId;
+
+    private String adminName;
 
     private Integer type;
 

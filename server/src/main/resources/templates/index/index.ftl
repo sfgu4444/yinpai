@@ -88,6 +88,12 @@
                             <cite>用户列表</cite>
                         </a>
                     </li>
+                    <li>
+                         <a _href="/admin/pay/record">
+                             <i class="iconfont"></i>
+                             <cite>交易记录</cite>
+                         </a>
+                    </li>
                 </ul>
             </li>
         </ul>
