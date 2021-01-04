@@ -293,13 +293,27 @@ public class UserPayRecordService {
         Calendar expire = getInstance();
         expire.add(MINUTE, 10);
         String receipt = (String) map.get("receipt");
+        Map mapResult = JsonUtils.toObject(receipt, Map.class);
+        String inApp = (String) mapResult.get("in_app");
+        Map inAppResult = JsonUtils.toObject(inApp, Map.class);
+        Long orderId = (Long) inAppResult.get("transaction_id");
+        String price = (String) inAppResult.get("product_id");
+        String totalFee="";
+        if(price != null && !"".equals(price)){
+            for(int i=0;i<price.length();i++){
+                if(price.charAt(i)>=48 && price.charAt(i)<=57){
+                    totalFee+=price.charAt(i);
+                }
+            }
+
+        }
         if (0 != statusFont) {
             //存储错误
             UserOrder userOrder = UserOrder.builder()
-                    //.orderId(orderId)
+                    .orderId(orderId)
                     .userId(loginUserInfoDto.getUserId() + "")
                     .body("收集宝")
-                    .totalFee(new BigDecimal(1))
+                    .totalFee(new BigDecimal(totalFee))
                     .ipAddress(ProjectUtil.getIpAddr())
                     .payPlatform("APPLE")
                     .orderMetaData(receipt)
@@ -325,10 +339,10 @@ public class UserPayRecordService {
         String status = appleResultJSON.getString("status");*/
         if (0 == statusFont) {
             UserOrder userOrder = UserOrder.builder()
-                    //.orderId(orderId)
+                    .orderId(orderId)
                     .userId(loginUserInfoDto.getUserId() + "")
                     .body("收集宝")
-                    .totalFee(new BigDecimal(1))
+                    .totalFee(new BigDecimal(totalFee))
                     .ipAddress(ProjectUtil.getIpAddr())
                     .payPlatform("APPLE")
                     .orderMetaData(receipt)
