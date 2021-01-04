@@ -59,6 +59,9 @@
                     <i class="layui-icon">&#xe62f;</i>
                     </#if>
                     </a>
+                    <a title="查看" onclick="x_admin_show('查看', '/admin/work/edit?id=${v.workId}')" href="javascript:;">
+                    <i class="layui-icon">&#xe64c;</i>
+                    </a>
                 </td>
             </tr>
         </#list>

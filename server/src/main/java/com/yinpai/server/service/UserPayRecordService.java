@@ -31,6 +31,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -393,5 +394,26 @@ public class UserPayRecordService {
         }
 
         return retMap;
+    }
+
+    /**
+     * todo 没写查询
+     * @param map
+     * @param pageable
+     * @return
+     */
+    public Page<UserPayRecord> findFilterAll(Map<String, String> map, Pageable pageable) {
+        Page<UserPayRecord> recordRepositoryAll =  userPayRecordRepository.findAll(ProjectUtil.getSpecification(map), pageable);
+        for (UserPayRecord userPayRecord : recordRepositoryAll){
+            User user  = userRepository.findUserById(userPayRecord.getUserId());
+            if(null != user){
+                userPayRecord.setUserName(user.getUsername());
+            }
+            Admin admin = adminService.findById(userPayRecord.getAdminId());
+            if(null != admin){
+                userPayRecord.setAdminName(admin.getAdminName());
+            }
+        }
+        return userPayRecordRepository.findAll(ProjectUtil.getSpecification(map), pageable);
     }
 }

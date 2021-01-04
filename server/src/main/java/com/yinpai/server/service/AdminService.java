@@ -57,7 +57,7 @@ public class AdminService {
         if (adminInfoDto.isSuperAdmin()) {
             return adminRepository.findAll(ProjectUtil.getSpecification(map), pageable);
         } else {
-            return adminRepository.findAllById(adminInfoDto.getAdminId(), pageable);
+           return adminRepository.findAllById(adminInfoDto.getAdminId(), pageable);
         }
     }
 
