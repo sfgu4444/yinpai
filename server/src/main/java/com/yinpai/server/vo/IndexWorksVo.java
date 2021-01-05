@@ -54,4 +54,7 @@ public class IndexWorksVo {
     @ApiModelProperty("浏览次数")
     private Long lookCount;
 
+    @ApiModelProperty("标签")
+    public String lable;
+
 }

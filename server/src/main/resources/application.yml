@@ -68,3 +68,8 @@ logging:
 
 userinfo:
     logo: 'http://yinpai.oss-cn-beijing.aliyuncs.com/yinpai/2020-12-29/fb72c656-a668-4fd6-969b-f7cc06c5b1d0534640.png'
+
+
+sensitive_url_dev: '/Users/liuzhenda/Downloads/yinpai/server/src/main/resources/sensi_words.txt'
+
+sensitive_url: ''

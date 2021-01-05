@@ -76,7 +76,16 @@
                 用户名为4～255个字符
             </div>
         </div>
-
+            <div class="layui-form-item">
+                     <label class="layui-form-label">选择标签</label>
+                        <div class="layui-input-block">
+                          <select  value="lable" name="lable" lay-verify="required">
+                            <#list lableList as v>
+                            <option id="${v.id}">${v.lableName}</option>
+                            </#list>
+                          </select>
+                        </div>
+            </div>
         <div class="layui-form-item type-2">
             <label class="layui-form-label">
                 <span class="x-red">*</span>封面

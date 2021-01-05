@@ -31,6 +31,8 @@ public class Works{
 
     public Long collectionCount = 0L;
 
+    public Long downloadCount = 0L;
+
     public Integer type;
 
     public String coverImageUrl;
@@ -48,5 +50,9 @@ public class Works{
     public Date createTime = new Date();
 
     public Date updateTime = new Date();
+
+    public Integer lable;
+
+    public Long collectionsCount = 0L;
 
 }

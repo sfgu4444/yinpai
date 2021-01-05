@@ -65,4 +65,7 @@ public class WorkDetailVo {
 
     @ApiModelProperty("封面图")
     public String coverImageUrl;
+
+    @ApiModelProperty("标签")
+    public String lable;
 }

@@ -1,7 +1,6 @@
 package com.yinpai.server.controller.admin;
 
-import com.yinpai.server.domain.dto.LoginAdminInfoDto;
-import com.yinpai.server.service.AdminService;
+import com.yinpai.server.service.MessageService;
 import com.yinpai.server.thread.threadlocal.LoginAdminThreadLocal;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,9 +15,16 @@ import java.util.Map;
 @RequestMapping("/")
 public class IndexController {
 
+    private final MessageService  messageService;
+
+    public IndexController(MessageService messageService) {
+        this.messageService = messageService;
+    }
+
     @GetMapping("/index")
     public ModelAndView index(Map<String, Object> map){
         map.put("superAdmin", LoginAdminThreadLocal.get().isSuperAdmin());
+        map.put("messageTotal",messageService.IsReadMessage());
         return new ModelAndView("index/index", map);
     }
 

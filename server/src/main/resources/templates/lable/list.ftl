@@ -7,7 +7,7 @@
         <a href="">后台</a>
         <a href="">管理</a>
         <a>
-          <cite>作品列表</cite></a>
+          <cite>标签列表</cite></a>
       </span>
     <a class="layui-btn layui-btn-small" style="line-height:1.6em;margin-top:3px;float:right" href="javascript:location.replace(location.href);" title="刷新">
         <i class="layui-icon" style="line-height:30px">ဂ</i></a>
@@ -15,37 +15,20 @@
 <div class="x-body">
     <div class="layui-row">
         <form class="layui-form layui-col-md12 x-so">
-            <div class="layui-form-item" style="display: inline-flex;">
-                  <select name="sort"  lay-verify="" value="${name!'请选择'}">
-                     <option value="">请选择</option>
-                     <option value="0">收藏数</option>
-                     <option value="1">浏览量</option>
-                     <option value="2">下载量</option>
-                   </select>
-             </div>
-            <input type="text" name="title"  placeholder="请输入标题" autocomplete="off" class="layui-input" value="${RequestParameters['title']!''}" />
+            <input type="text" name="lableName"  placeholder="请输入标签" autocomplete="off" class="layui-input" value="${RequestParameters['lableName']!''}" />
             <button class="layui-btn"  lay-submit="" lay-filter="sreach"><i class="layui-icon">&#xe615;</i></button>
         </form>
     </div>
     <xblock>
-        <button class="layui-btn" onclick="x_admin_show('添加作品', '/admin/work/add')"><i class="layui-icon"></i>添加</button>
-        <span class="x-right" style="line-height:40px">共有数据：${info.getTotalElements()} 条</span>
+        <button class="layui-btn" onclick="x_admin_show('添加标签', '/admin/lable/add')"><i class="layui-icon"></i>添加标签</button>
+        <span class="x-right" style="line-height:40px">共有标签：${info.getTotalElements()} 条</span>
     </xblock>
     <table class="layui-table">
         <thead>
         <tr>
-            <th>作品ID</th>
-            <th>标题</th>
-            <th>所属商家账号</th>
-            <th>所属商家昵称</th>
-            <th>资源类型</th>
-            <th>标签</th>
-            <th>封面</th>
-            <th>添加时间</th>
-            <th>收藏数</th>
-            <th>浏览量</th>
-            <th>下载量</th>
-            <th>作品状态</th>
+            <th>ID</th>
+            <th>标签名</th>
+            <th>创建时间</th>
             <td>操作</td>
         </tr>
         </thead>
@@ -53,38 +36,11 @@
         <#list info.content as v>
             <tr>
                 <td>${v.id}</td>
-                <td>${v.title!'-'}</td>
-                <td>${v.adminName!'-'}</td>
-                <td>${v.nickName!'-'}</td>
-                <#if v.type == 1 >
-                    <td>图片</td>
-                <#else>
-                    <td>视频</td>
-                </#if>
-                <td>${v.lable!'-'}</td>
-                <td>
-                    <img src="${v.coverImageUrl!'-'}" alt="${v.coverImageUrl!'-'}" /></td>
+                <td>${v.lableName}</td>
                 <td>${v.createTime!'-'}</td>
-                <td>${v.collectionCount!'0'}</td>
-                <td>${v.visitCount!'0'}</td>
-                <td>${v.downloadCount!'0'}</td>
-                <td class="td-status">
-                    <#if v.status == 1 >
-                    <span class="layui-btn layui-btn-normal layui-btn-mini">已启用</span>
-                    <#else>
-                    <span class="layui-btn layui-btn-normal layui-btn-mini layui-btn-disabled">已停用</span>
-                    </#if>
-                </td>
                 <td class="td-manage">
-                    <a onclick="member_stop(this, ${v.id})" href="javascript:;" <#if v.status == 1>title="启用"<#else>title="停用"</#if>>
-                    <#if v.status == 1>
-                    <i class="layui-icon">&#xe601;</i>
-                    <#else>
-                    <i class="layui-icon">&#xe62f;</i>
-                    </#if>
-                    </a>
-                    <a title="编辑" onclick="x_admin_show('编辑', '/admin/work/edit?id=${v.id}')" href="javascript:;">
-                        <i class="layui-icon">&#xe642;</i>
+                    <a title="编辑" onclick="x_admin_show('编辑', '/admin/lable/edit?id=${v.id}')" href="javascript:;">
+                     <i class="layui-icon">&#xe642;</i>
                     </a>
                     <a title="删除" onclick="member_del(this,'${v.id}')" href="javascript:;">
                         <i class="layui-icon">&#xe640;</i>
@@ -126,7 +82,7 @@
         }
         layer.confirm('确认'+text+'吗？',function(){
             $.ajax({
-                url:"/admin/work/status",
+                url:"/admin/admin/status",
                 data:{'id':id},
                 type:"post",
                 dataType:"json",
@@ -161,7 +117,7 @@
     function member_del(obj,id){
         layer.confirm('确认要删除吗？',function(){
             $.ajax({
-                url:"/admin/work/delete",
+                url:"/admin/admin/delete",
                 data:{"id":id,},
                 type:"post",
                 dataType:"json",

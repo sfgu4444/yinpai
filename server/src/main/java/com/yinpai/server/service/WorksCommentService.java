@@ -11,9 +11,11 @@ import com.yinpai.server.domain.entity.admin.Admin;
 import com.yinpai.server.domain.repository.WorksCommentRepository;
 import com.yinpai.server.domain.repository.WorksLookLogRepository;
 import com.yinpai.server.exception.NotLoginException;
+import com.yinpai.server.exception.ProjectException;
 import com.yinpai.server.thread.threadlocal.LoginAdminThreadLocal;
 import com.yinpai.server.thread.threadlocal.LoginUserThreadLocal;
 import com.yinpai.server.utils.ProjectUtil;
+import com.yinpai.server.utils.sensitive.SensitiveFilterService;
 import com.yinpai.server.vo.WorksCommentListVo;
 import com.yinpai.server.vo.admin.AdminWorksCommentListVo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -138,11 +140,12 @@ public class WorksCommentService {
         if (userInfoDto == null) {
             throw new NotLoginException("请先登陆");
         }
+        SensitiveFilterService filter = SensitiveFilterService.getInstance();
         Works works = worksService.findByIdNotNull(workId);
         WorksComment worksComment = new WorksComment();
         worksComment.setWorkId(workId);
         worksComment.setUserId(userInfoDto.getUserId());
-        worksComment.setContent(content);
+        worksComment.setContent(filter.replaceSensitiveWord(content, 1, "*"));
         worksComment.setAdminId(works.getAdminId());
         worksComment.setCreateTime(new Date());
         WorksComment result = worksCommentRepository.save(worksComment);

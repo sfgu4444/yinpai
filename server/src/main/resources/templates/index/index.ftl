@@ -18,8 +18,16 @@
             <#--</dl>-->
         <#--</li>-->
     </ul>
+
+
     <ul class="layui-nav right" lay-filter="">
+    <li class="layui-nav-item">
+        <a href="javascript:void(0);" onClick="toMessageList()">
+        <cite>未读消息 <span style="color:#f00;">${messageTotal}</span></cite>
+         </a>
+    </li>
         <li class="layui-nav-item">
+
             <a href="javascript:;">个人中心</a>
             <dl class="layui-nav-child"> <!-- 二级菜单 -->
                 <#--<dd><a onclick="x_admin_show('个人信息','http://www.baidu.com')">个人信息</a></dd>-->
@@ -34,6 +42,7 @@
 <!-- 左侧菜单开始 -->
 <div class="left-nav">
     <div id="side-nav">
+    <#if superAdmin == true>
         <ul id="nav">
             <li>
                 <a href="javascript:;">
@@ -51,6 +60,7 @@
                 </ul>
             </li>
         </ul>
+        </#if>
         <ul id="nav">
             <li>
                 <a href="javascript:;">
@@ -74,6 +84,8 @@
                 </ul>
             </li>
         </ul>
+
+        <#if superAdmin == true>
         <ul id="nav">
             <li>
                 <a href="javascript:;">
@@ -97,6 +109,7 @@
                 </ul>
             </li>
         </ul>
+        </#if>
         <#if superAdmin == true>
         <ul id="nav">
             <li>
@@ -114,10 +127,8 @@
                     </li>
                 </ul>
             </li>
-        </ul>
-        </#if>
-                <#if superAdmin == true>
-                <ul id="nav">
+           </ul>
+            <ul id="nav">
                     <li>
                         <a href="javascript:;">
                             <i class="iconfont"></i>
@@ -134,7 +145,41 @@
                         </ul>
                     </li>
                 </ul>
+                <ul id="nav">
+                            <li>
+                                <a href="javascript:;">
+                                    <i class="iconfont"></i>
+                                    <cite>标签管理</cite>
+                                    <i class="iconfont nav_right">&#xe697;</i>
+                                </a>
+                                <ul class="sub-menu">
+                                    <li>
+                                        <a _href="/admin/lable/list">
+                                            <i class="iconfont"></i>
+                                            <cite>标签列表</cite>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
                 </#if>
+        <ul id="nav">
+            <li>
+                <a href="javascript:;">
+                    <i class="iconfont"></i>
+                    <cite>消息管理</cite>
+                    <i class="iconfont nav_right">&#xe697;</i>
+                </a>
+                <ul class="sub-menu">
+                    <li>
+                        <a _href="/admin/message/list">
+                            <i class="iconfont"></i>
+                            <cite>消息列表</cite>
+                        </a>
+                    </li>
+                </ul>
+            </li>
+        </ul>
     </div>
 </div>
 <!-- <div class="x-slide_left"></div> -->
@@ -150,6 +195,15 @@
                 <iframe src='/index/welcome' frameborder="0" scrolling="yes" class="x-iframe"></iframe>
             </div>
         </div>
+
+        <div class="layui-tab-content" style="display:none;" id="messageContent">
+            <div class="layui-tab-item layui-show">
+                <iframe src='/admin/message/list' frameborder="0" scrolling="yes" class="x-iframe"></iframe>
+            </div>
+        </div>
+
+
+
     </div>
 </div>
 <div class="page-content-bg"></div>
@@ -162,5 +216,22 @@
 <!-- 底部结束 -->
 
 <audio preload="auto" src="/static/mp3/new_order_remind.mp3" id="new_order_remind"></audio>
+
+
+
+<script>
+function toMessageList(){
+      var messageCount =document.getElementById('messageContent');
+          if(messageCount.style.display=='none'){
+               messageCount.style.display='block'
+              }else{
+               messageCount.style.display='none'
+            };
+   };
+
+
+</script>
+
+
 </body>
 </html>

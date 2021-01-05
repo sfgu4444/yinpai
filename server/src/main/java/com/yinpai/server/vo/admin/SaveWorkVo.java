@@ -33,4 +33,6 @@ public class SaveWorkVo {
     public String videoDetail;
 
     public String folder;
+
+    public String lable;
 }

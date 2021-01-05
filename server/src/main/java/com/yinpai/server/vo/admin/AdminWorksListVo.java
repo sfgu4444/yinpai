@@ -1,5 +1,6 @@
 package com.yinpai.server.vo.admin;
 
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.util.Date;
@@ -43,4 +44,6 @@ public class AdminWorksListVo {
     private Date createTime = new Date();
 
     private Date updateTime = new Date();
+
+    public String lable;
 }

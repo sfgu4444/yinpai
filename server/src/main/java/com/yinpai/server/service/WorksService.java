@@ -4,10 +4,12 @@ import com.yinpai.server.domain.dto.LoginAdminInfoDto;
 import com.yinpai.server.domain.dto.LoginUserInfoDto;
 import com.yinpai.server.domain.dto.PageResponse;
 import com.yinpai.server.domain.dto.fiter.WorksFilterDto;
+import com.yinpai.server.domain.entity.Lable;
 import com.yinpai.server.domain.entity.UserDownloadRecord;
 import com.yinpai.server.domain.entity.Works;
 import com.yinpai.server.domain.entity.WorksLookLog;
 import com.yinpai.server.domain.entity.admin.Admin;
+import com.yinpai.server.domain.repository.LableRepository;
 import com.yinpai.server.domain.repository.WorksLookLogRepository;
 import com.yinpai.server.domain.repository.WorksRepository;
 import com.yinpai.server.enums.CommonEnum;
@@ -16,6 +18,7 @@ import com.yinpai.server.exception.ProjectException;
 import com.yinpai.server.thread.threadlocal.LoginAdminThreadLocal;
 import com.yinpai.server.thread.threadlocal.LoginUserThreadLocal;
 import com.yinpai.server.utils.ProjectUtil;
+import com.yinpai.server.utils.sensitive.SensitiveFilterService;
 import com.yinpai.server.vo.IndexWorksVo;
 import com.yinpai.server.vo.WorkDetailVo;
 import com.yinpai.server.vo.admin.AdminWorksListVo;
@@ -70,8 +73,12 @@ public class WorksService {
 
     private final WorksLookLogRepository worksLookLogRepository;
 
+    private final LableRepository lableRepository;
+
+    private final LableService lableService;
+
     @Autowired
-    public WorksService(WorksRepository worksRepository, UserService userService, UserFollowService userFollowService, WorksResourcesService worksResourcesService, @Lazy UserCollectionService userCollectionService, AdminService adminService, @Lazy UserPayService userPayService, @Lazy UserDownloadRecordService userDownloadRecordService, @Lazy WorksCommentService worksCommentService, WorksLookLogRepository worksLookLogRepository) {
+    public WorksService(WorksRepository worksRepository, UserService userService, UserFollowService userFollowService, WorksResourcesService worksResourcesService, @Lazy UserCollectionService userCollectionService, AdminService adminService, @Lazy UserPayService userPayService, @Lazy UserDownloadRecordService userDownloadRecordService, @Lazy WorksCommentService worksCommentService, WorksLookLogRepository worksLookLogRepository, LableRepository lableRepository, LableService lableService) {
         this.worksRepository = worksRepository;
         this.userService = userService;
         this.userFollowService = userFollowService;
@@ -82,6 +89,8 @@ public class WorksService {
         this.userDownloadRecordService = userDownloadRecordService;
         this.worksCommentService = worksCommentService;
         this.worksLookLogRepository = worksLookLogRepository;
+        this.lableRepository = lableRepository;
+        this.lableService = lableService;
     }
 
     public Set<Integer> adminWorkIds(Integer adminId) {
@@ -110,6 +119,17 @@ public class WorksService {
                 vo.setNickName(admin.getNickName());
             }
             vo.setDownloadCount(userDownloadRecordService.workDownloadCount(w.getId()));
+            vo.setCollectionCount(userCollectionService.workCollectionCount(w.getId()));
+            if(null != w.getLable()){
+                Lable lable = lableService.findByIdNotNull(w.getLable());
+                if(null != lable){
+                    vo.setLable(lable.getLableName());
+                }
+            }
+
+            w.setCollectionsCount(vo.getCollectionCount());
+            w.setDownloadCount(vo.getDownloadCount());
+            worksRepository.save(w);
             voList.add(vo);
         });
         return new PageImpl<>(voList, works.getPageable(), works.getTotalElements());
@@ -158,6 +178,12 @@ public class WorksService {
             vo.setAdminId(w.getAdminId());
             vo.setLookCount(w.getLookCount());
             vo.setCreateTime(w.getCreateTime());
+            if(null != w.getLable()){
+                Lable lable = lableService.findByIdNotNull(w.getLable());
+                if(null != lable){
+                    vo.setLable(lable.getLableName());
+                }
+            }
             Admin admin = adminService.findById(w.getAdminId());
             vo.setNickName(admin.getNickName());
             vo.setAvatarUrl(admin.getAvatarUrl());
@@ -190,6 +216,12 @@ public class WorksService {
         vo.setCoverImageUrl(works.getCoverImageUrl());
         vo.setCommentCount(worksCommentService.commentCount(workId));
         vo.setCollectionCount(userCollectionService.workCollectionCount(workId));
+        if(null != works.getLable()){
+           Lable lable = lableService.findByIdNotNull(works.getLable());
+           if(null != lable){
+               vo.setLable(lable.getLableName());
+           }
+        }
         LoginUserInfoDto userInfoDto = LoginUserThreadLocal.get();
         if (userInfoDto != null) {
             vo.setFollow(userFollowService.isFollow(userInfoDto.getUserId(), works.getAdminId()));
@@ -250,16 +282,23 @@ public class WorksService {
         worksRepository.delete(works);
     }
 
-    public void addWork(SaveWorkVo vo) {
+    public void addWork(SaveWorkVo vo){
+        SensitiveFilterService filter = SensitiveFilterService.getInstance();
         Works works = new Works();
         LoginAdminInfoDto adminInfoDto = LoginAdminThreadLocal.get();
         works.setAdminId(adminInfoDto.getAdminId());
         works.setTitle(vo.getTitle());
         works.setContent(vo.getContent());
+        String content = vo.getTitle()+vo.getContent();
+        if(!filter.replaceSensitiveWord(content, 1, "*").equals(content)){
+            throw new ProjectException("检测到敏感词汇");
+        }
+        Lable lable =lableRepository.findByLableName(vo.getLable());
+        works.setLable(lable.getId());
         works.setType(vo.getType());
         works.setCoverImageUrl(vo.getCoverImageUrl());
         works.setStatus(adminInfoDto.getIsAudit() == 1 ? CommonEnum.NO.getCode() : CommonEnum.YES.getCode());
-        Integer isFree = vo.getIsFree();
+        Integer isFree = null == vo.getIsFree() ? 1 : vo.isFree;
         works.setIsFree(isFree);
         if (isFree == 1) {
             works.setPrice(0);
@@ -300,7 +339,8 @@ public class WorksService {
         } else {
             works.setPrice(vo.getPrice());
         }
-
+        Lable lable =lableRepository.findByLableName(vo.getLable());
+        works.setLable(lable.getId());
         worksResourcesService.deleteWorks(vo.getId());
         List<String> resources;
         if (vo.getType().equals(1)) {

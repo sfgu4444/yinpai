@@ -5,39 +5,42 @@
 <div class="x-nav">
   <span>
     <span style="color: #666;vertical-align: middle;margin-right: 20px;">起止时间</span>
-    <button class="layui-btn"  lay-submit="" style="height: 22px;line-height: 22px;padding: 0 10px;font-size: 12px;margin-right: 10px;">今日</button>
-    <button class="layui-btn"  lay-submit="" style="height: 22px;line-height: 22px;padding: 0 10px;font-size: 12px;margin-right: 10px;">近一周</button>
-    <button class="layui-btn"  lay-submit="" style="height: 22px;line-height: 22px;padding: 0 10px;font-size: 12px;margin-right: 10px;">近一月</button>
+    <input type="button"   value="今日" name="today" style="height: 22px;line-height: 22px;padding: 0 10px;margin-right: 10px;border: none;display: inline-block;background-color: #009688;color: #fff;white-space: nowrap;text-align: center;font-size: 14px;border: none;border-radius: 2px;cursor: pointer;"/>
+    <input type="button"  value="近一周" name="week" style="height: 22px;line-height: 22px;padding: 0 10px;margin-right: 10px;border: none;display: inline-block;background-color: #009688;color: #fff;white-space: nowrap;text-align: center;font-size: 14px;border: none;border-radius: 2px;cursor: pointer;"/>
+    <input type="button"  value="近一月" name="month" style="height: 22px;line-height: 22px;padding: 0 10px;margin-right: 10px;border: none;display: inline-block;background-color: #009688;color: #fff;white-space: nowrap;text-align: center;font-size: 14px;border: none;border-radius: 2px;cursor: pointer;"/>
     <span style="color: #666;vertical-align: middle;margin-left: 70px;">作品类型</span>
   </span>
 </div>
-<div style="padding: 20px;">
+<div style="padding: 20px;display: inline-block;">
+<form class="layui-form >
     <div class="layui-form" style="display: inline-block;">
       <div class="layui-form-item">
         <div class="layui-inline" style="margin-right: 0;margin-bottom: 0;">
-          <input type="text" class="layui-input test-item" id="beforeTime" placeholder="2020-01-01 00:00:00">
+          <input type="text" name ="startTime" value="${startTime}"  class="layui-input test-item" id="startTime" placeholder="2020-01-01 00:00:00">
         </div>
         <span> — </span>
         <div class="layui-inline" style="margin-right: 0;margin-bottom: 0;">
-          <input type="text" class="layui-input test-item" id="endTime" placeholder="2020-12-01 00:00:00">
+          <input type="text" name ="endTime" value="${endTime}" class="layui-input test-item" id="endTime" placeholder="2021-12-31 00:00:00">
         </div>
       </div>
     </div>
 
+        <div class="layui-form-item" style="display: inline-flex;">
+            <div class="layui-input-inline" style="margin-left: 10px;">
+              <select name="type" style="height: 38px;">
+                <option value="">请选择</option>
+                <option value="1">图片</option>
+                <option value="2">视频</option>
+              </select>
+            </div>
+            <div class="layui-form-item" style="display: inline-block;margin-bottom: 0;margin-left: 20px;vertical-align: middle;line-height: 38px;">
+                <button class="layui-btn"  lay-submit="" lay-filter="sreach"><i class="layui-icon">&#xe615;</i></button>
+                <a href="javascript:void(0)" style="color: #666;">重置</a><i class="layui-icon layui-icon-refresh" style="font-size: 14px;padding-left: 5px;color: #666;"></i>
+            </div>
+        </div>
 
+    </form>
 
-
-
-<div class="layui-form-item" style="display: inline-flex;">
-    <div class="layui-input-inline" style="margin-left: 10px;">
-      <select name="quiz1" style="height: 38px;">
-        <option value="">请选择</option>
-        <option value="图片" selected="">图片</option>
-        <option value="视频">视频</option>
-      </select>
-    </div>
-</div>
-<a href="javascript:void(0)" style="color: #666;">重置</a><i class="layui-icon layui-icon-refresh" style="font-size: 14px;padding-left: 5px;color: #666;"></i>
 </div>
 
                <!-- 为ECharts准备一个具备大小（宽高）的Dom -->

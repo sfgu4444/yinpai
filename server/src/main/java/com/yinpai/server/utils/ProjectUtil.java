@@ -2,6 +2,7 @@ package com.yinpai.server.utils;
 
 import com.yinpai.server.service.AdminService;
 import com.yinpai.server.thread.threadlocal.LoginAdminThreadLocal;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -22,7 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
+@Slf4j
 public class ProjectUtil {
 
     public static boolean isAjax() {
@@ -43,6 +44,7 @@ public class ProjectUtil {
             List<Predicate> predicates = new ArrayList<>();
             for (String key : map.keySet()) {
                 String param = request.getParameter(key);
+                log.info("【查询条件获取】 key : {} , value : {}",map.get(key),param);
                 switch (map.get(key)) {
                     case "like":
                         if (!StringUtils.isEmpty(param)) {

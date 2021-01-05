@@ -18,6 +18,7 @@ import com.yinpai.server.domain.repository.UserRechargeRecordRepository;
 import com.yinpai.server.domain.repository.UserRepository;
 import com.yinpai.server.enums.PayStatus;
 import com.yinpai.server.exception.NotLoginException;
+import com.yinpai.server.exception.ProjectException;
 import com.yinpai.server.thread.threadlocal.LoginUserThreadLocal;
 import com.yinpai.server.utils.*;
 import com.yinpai.server.vo.PayRecordListVo;
@@ -407,5 +408,14 @@ public class UserPayRecordService {
             }
         }
         return userPayRecordRepository.findAll(ProjectUtil.getSpecification(map), pageable);
+    }
+
+    public void delete(Integer id) {
+        UserPayRecord userPayRecord = findByIdNotNull(id);
+        userPayRecordRepository.delete(userPayRecord);
+    }
+
+    public UserPayRecord findByIdNotNull(Integer id) {
+        return userPayRecordRepository.findById(id).orElseThrow(() -> new ProjectException("支付记录不存在"));
     }
 }

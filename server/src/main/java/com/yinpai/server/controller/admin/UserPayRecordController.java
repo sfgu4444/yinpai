@@ -5,14 +5,14 @@ import com.yinpai.server.domain.entity.UserPayRecord;
 import com.yinpai.server.service.UserPayRecordService;
 import com.yinpai.server.service.UserService;
 import com.yinpai.server.utils.PageUtil;
+import com.yinpai.server.utils.ResultUtil;
+import com.yinpai.server.vo.admin.ResultVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.util.HashMap;
@@ -48,6 +48,12 @@ public class UserPayRecordController {
         return new ModelAndView("user/record", map);
     }
 
+    @PostMapping("/delete")
+    @ResponseBody
+    public ResultVO delete(@RequestParam Integer id) {
+        userPayRecordService.delete(id);
+        return ResultUtil.success("用户删除成功");
+    }
 
 
 }
