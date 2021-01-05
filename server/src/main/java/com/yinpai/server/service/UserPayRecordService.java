@@ -219,7 +219,7 @@ public class UserPayRecordService {
     private String signType;
 
     // 将request中的参数转换成Map
-    private  Map<String, String> convertParamsToMap(Map requestParams) {
+    private Map<String, String> convertParamsToMap(Map requestParams) {
         Map<String, String> retMap = new HashMap();
         Set<Map.Entry<String, List>> entrySet = requestParams.entrySet();
         for (Map.Entry<String, List> entry : entrySet) {
@@ -261,7 +261,7 @@ public class UserPayRecordService {
         String trade_status = map.get("trade_status");
         String out_trade_no = map.get("out_trade_no");
         // 签名校验
-        log.info("【签名校验】 {}",signVerified);
+        log.info("【签名校验】 {}", signVerified);
         if (signVerified) {
             if ("TRADE_SUCCESS".equals(trade_status) || "TRADE_FINISHED".equals(trade_status)) {
                 Optional<UserOrder> optional = userOrderRepository.findById(Long.valueOf(out_trade_no));
@@ -284,49 +284,69 @@ public class UserPayRecordService {
     }
 
 
-
-    /*  status
-     * 0 SUCCESS
-     * 21000 App Store不能读取你提供的JSON对象
-     * 21002 receipt-data域的数据有问题
-     * 21003 receipt无法通过验证
-     * 21004 提供的shared secret不匹配你账号中的shared secret
-     * 21005 receipt服务器当前不可用
-     * 21006 receipt合法，但是订阅已过期。服务器接收到这个状态码时，receipt数据仍然会解码并一起发送
-     * 21007 receipt是Sandbox receipt，但却发送至生产系统的验证服务
-     * 21008 receipt是生产receipt，但却发送至Sandbox环境的验证服务
-     */
-
     public PayResultVo appleOrderDetermine(Map<String, Object> map) throws JSONException {
         LoginUserInfoDto loginUserInfoDto = LoginUserThreadLocal.get();
-        if (null == loginUserInfoDto) {/*throw new NotLoginException("用户必须登录!")*/}
-        ;
+        if (null == loginUserInfoDto) {
+            throw new NotLoginException("用户必须登录!");
+        }
         PayResultVo payResultVo = new PayResultVo();
         Integer statusFont = (Integer) map.get("status");
-        if (0 != statusFont) {
-            throw new RuntimeException("status 参数传递有误!!!!");
+        Calendar expire = getInstance();
+        expire.add(MINUTE, 10);
+        String receipt = (String) map.get("receipt");
+        Map mapResult = JsonUtils.toObject(receipt, Map.class);
+        String inApp = (String) mapResult.get("in_app");
+        Map inAppResult = JsonUtils.toObject(inApp, Map.class);
+        Long orderId = (Long) inAppResult.get("transaction_id");
+        String price = (String) inAppResult.get("product_id");
+        String totalFee="";
+        if(price != null && !"".equals(price)){
+            for(int i=0;i<price.length();i++){
+                if(price.charAt(i)>=48 && price.charAt(i)<=57){
+                    totalFee+=price.charAt(i);
+                }
+            }
+
         }
-        String receipt = JsonUtils.toJsonString(map);
-        String environment = (String) map.get("environment");
+        if (0 != statusFont) {
+            //存储错误
+            UserOrder userOrder = UserOrder.builder()
+                    .orderId(orderId)
+                    .userId(loginUserInfoDto.getUserId() + "")
+                    .body("收集宝")
+                    .totalFee(new BigDecimal(totalFee))
+                    .ipAddress(ProjectUtil.getIpAddr())
+                    .payPlatform("APPLE")
+                    .orderMetaData(receipt)
+                    .timeStart(DateUtil.getMMDDYYHHMMSS(new Date()))
+                    .timeExpire(DateUtil.getMMDDYYHHMMSS(expire.getTime()))
+                    .timeStamp(System.currentTimeMillis() + "")
+                    .orderPayStatus(0)
+                    .orderShipStatus(0)
+                    .orderStatus(PayStatus.expaid)
+                    .build();
+            userOrderRepository.save(userOrder);
+            throw new RuntimeException("支付失败");
+        }
+
+         /*String environment = (String) map.get("environment");
         JSONObject appleResultJSON = null;
-        if (environment.equals("Sandbox")) {
+       if (environment.equals("Sandbox")) {
             appleResultJSON = new JSONObject(IosVerifyUtil.buyAppVerify(receipt, 0));
         } else {
             appleResultJSON = new JSONObject(IosVerifyUtil.buyAppVerify(receipt, 1));
         }
         log.info("【苹果验证结果】: 【{}】", appleResultJSON);
-        String status = appleResultJSON.getString("status");
-        if ("0".equals(status)) {
-            Calendar expire = getInstance();
-            expire.add(MINUTE, 10);
+        String status = appleResultJSON.getString("status");*/
+        if (0 == statusFont) {
             UserOrder userOrder = UserOrder.builder()
-                    //.orderId(orderId)
+                    .orderId(orderId)
                     .userId(loginUserInfoDto.getUserId() + "")
                     .body("收集宝")
-                    // TODO: 2020/12/14 支付宝订单金额单位是元  订单内是分  (需要*100转换)
-                    .totalFee(new BigDecimal(1))
+                    .totalFee(new BigDecimal(totalFee))
                     .ipAddress(ProjectUtil.getIpAddr())
                     .payPlatform("APPLE")
+                    .orderMetaData(receipt)
                     .timeStart(DateUtil.getMMDDYYHHMMSS(new Date()))
                     .timeExpire(DateUtil.getMMDDYYHHMMSS(expire.getTime()))
                     .timeStamp(System.currentTimeMillis() + "")
@@ -334,12 +354,14 @@ public class UserPayRecordService {
                     .orderShipStatus(1)
                     .orderStatus(PayStatus.topaid)
                     .build();
-            userOrderRepository.save(userOrder);
+            UserOrder order = userOrderRepository.save(userOrder);
+            User user = userRepository.findUserById(loginUserInfoDto.getUserId());
+            orderShip(user, order);
             payResultVo.setCode(HttpStatus.OK);
             payResultVo.setMsg("充值成功!");
         } else {
             payResultVo.setCode(HttpStatus.INTERNAL_SERVER_ERROR);
-            payResultVo.setMsg(status);
+            payResultVo.setMsg("充值失败");
         }
         return payResultVo;
     }
@@ -366,7 +388,7 @@ public class UserPayRecordService {
         return userOrderRepository.save(userOrder);
     }
 
-    public  Map<String, String> convertRequestParamsToMap(HttpServletRequest request) {
+    public Map<String, String> convertRequestParamsToMap(HttpServletRequest request) {
         Map<String, String> retMap = new HashMap<String, String>();
         Set<Map.Entry<String, String[]>> entrySet = request.getParameterMap().entrySet();
         for (Map.Entry<String, String[]> entry : entrySet) {
