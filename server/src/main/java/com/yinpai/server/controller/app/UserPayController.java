@@ -41,6 +41,7 @@ public class UserPayController {
 
     @GetMapping("/work/{workId}")
     @ApiOperation("购买作品")
+    @WebLog(description = "购买作品")
     public void userPayWork(@ApiParam("作品ID") @PathVariable Integer workId) {
         userPayService.userPayWork(workId);
     }

@@ -5,6 +5,7 @@ import com.yinpai.server.domain.dto.fiter.BaseFilterDto;
 import com.yinpai.server.domain.dto.fiter.WorksCommentFilterDto;
 import com.yinpai.server.domain.repository.ReportCommonRepository;
 import com.yinpai.server.domain.repository.ReportRepository;
+import com.yinpai.server.log.WebLog;
 import com.yinpai.server.service.WorksCommentService;
 import com.yinpai.server.vo.WorksCommentListVo;
 import com.yinpai.server.vo.admin.ReportVo;
@@ -52,6 +53,7 @@ public class WorksCommentController {
 
     @PostMapping
     @ApiOperation("发表评论")
+    @WebLog(description = "发表评论")
     public Integer addComment(@ApiParam("作品ID") @RequestParam Integer workId,
                               @ApiParam("评论内容") @RequestParam String content) {
         return worksCommentService.addComment(workId, content);

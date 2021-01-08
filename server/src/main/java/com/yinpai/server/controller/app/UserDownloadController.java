@@ -2,6 +2,7 @@ package com.yinpai.server.controller.app;
 
 import com.yinpai.server.domain.dto.PageResponse;
 import com.yinpai.server.domain.dto.fiter.BaseFilterDto;
+import com.yinpai.server.log.WebLog;
 import com.yinpai.server.service.UserDownloadRecordService;
 import com.yinpai.server.service.WorksService;
 import com.yinpai.server.vo.UserDownloadListVo;
@@ -33,6 +34,7 @@ public class UserDownloadController {
 
     @ApiOperation("用户作品下载")
     @GetMapping("/url")
+    @WebLog(description = "购买作品")
     public String downloadUrl(@ApiParam("作品ID") @RequestParam("workId") Integer workId) {
         return worksService.downloadUrl(workId);
     }

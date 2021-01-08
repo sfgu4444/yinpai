@@ -3,6 +3,7 @@ package com.yinpai.server.controller.app;
 import com.yinpai.server.domain.dto.LoginUserInfoDto;
 import com.yinpai.server.domain.entity.Report;
 import com.yinpai.server.exception.NotLoginException;
+import com.yinpai.server.log.WebLog;
 import com.yinpai.server.service.ReportService;
 import com.yinpai.server.thread.threadlocal.LoginUserThreadLocal;
 import io.swagger.annotations.Api;
@@ -35,6 +36,7 @@ public class ReportController {
 
     @PostMapping("/add")
     @ApiOperation("举报")
+    @WebLog(description = "购买作品")
     public void add(@ApiParam("举报类型作品ID") @RequestParam("workId") Integer workId,
                     @ApiParam("举报类型，直接传汉字") @RequestParam("type") String type,
                     @ApiParam("举报内容") @RequestParam("content") String content) {

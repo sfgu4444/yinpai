@@ -180,6 +180,31 @@
                 </ul>
             </li>
         </ul>
+        <ul id="nav">
+                    <li>
+                        <a href="javascript:;">
+                            <i class="iconfont"></i>
+                            <cite>提现管理</cite>
+                            <i class="iconfont nav_right">&#xe697;</i>
+                        </a>
+                        <ul class="sub-menu">
+                            <li>
+                                <a _href="/admin/withdrawal/list">
+                                    <i class="iconfont"></i>
+                                    <cite>提现列表</cite>
+                                </a>
+                            </li>
+                             <#if superAdmin != true>
+                        <li>
+                             <a _href="/admin/withdrawal/bind">
+                                 <i class="iconfont"></i>
+                                 <cite>绑定信息</cite>
+                             </a>
+                        </li>
+                        </#if>
+                        </ul>
+                    </li>
+                </ul>
     </div>
 </div>
 <!-- <div class="x-slide_left"></div> -->

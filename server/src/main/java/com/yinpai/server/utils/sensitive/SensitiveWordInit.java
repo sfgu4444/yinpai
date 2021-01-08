@@ -87,7 +87,8 @@ public class SensitiveWordInit {
 
 
 //敏感词库
-        File file = new File("/Users/liuzhenda/Downloads/yinpai/server/src/main/resources/sensi_words.txt");
+        //File file = new File("/Users/liuzhenda/Downloads/yinpai/server/src/main/resources/sensi_words.txt");
+        File file = new File("/root/soul/sensi_words.txt");
         try {
 // 读取文件输入流
             InputStreamReader read = new InputStreamReader(new FileInputStream(file), ENCODING);

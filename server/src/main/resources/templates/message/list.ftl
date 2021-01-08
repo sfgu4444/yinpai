@@ -55,9 +55,11 @@
                     </#if>
                 </td>
                 <td class="td-manage">
+
                     <a title="阅读" onclick="x_admin_show('阅读', '/admin/message/edit?id=${v.id}')" href="javascript:;">
-                     <i class="layui-icon">&#xe618;</i>
+                      <i class="layui-icon">&#xe618;</i>
                     </a>
+
                     <a title="删除" onclick="member_del(this,'${v.id}')" href="javascript:;">
                         <i class="layui-icon">&#xe640;</i>
                     </a>

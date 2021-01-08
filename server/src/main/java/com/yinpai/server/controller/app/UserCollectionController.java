@@ -5,6 +5,7 @@ import com.yinpai.server.domain.dto.PageResponse;
 import com.yinpai.server.domain.dto.fiter.BaseFilterDto;
 import com.yinpai.server.domain.dto.fiter.UserCollectionFilterDto;
 import com.yinpai.server.exception.NotLoginException;
+import com.yinpai.server.log.WebLog;
 import com.yinpai.server.service.UserCollectionService;
 import com.yinpai.server.thread.threadlocal.LoginUserThreadLocal;
 import com.yinpai.server.vo.IndexWorksVo;
@@ -33,6 +34,7 @@ public class UserCollectionController {
 
     @PostMapping("/{workId}")
     @ApiOperation("用户收藏与取消")
+    @WebLog(description = "购买作品")
     public Integer collection(@PathVariable Integer workId) {
         return userCollectionService.collectionWork(workId);
     }

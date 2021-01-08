@@ -4,6 +4,7 @@ import com.yinpai.server.domain.dto.LoginUserInfoDto;
 import com.yinpai.server.domain.dto.PageResponse;
 import com.yinpai.server.domain.dto.fiter.BaseFilterDto;
 import com.yinpai.server.exception.NotLoginException;
+import com.yinpai.server.log.WebLog;
 import com.yinpai.server.service.UserPayRecordService;
 import com.yinpai.server.thread.threadlocal.LoginUserThreadLocal;
 import com.yinpai.server.vo.PayRecordListVo;

@@ -50,4 +50,10 @@ public class Admin{
 
     private Integer money;
 
+    private String nameBandk;
+
+    private String bandk;
+
+    private Long bandkAccount;
+
 }

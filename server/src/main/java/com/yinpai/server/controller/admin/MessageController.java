@@ -44,6 +44,7 @@ public class MessageController {
         map.put("info", list);
         map.put("html", PageUtil.pageHtml(list.getTotalElements(), page, size));
         map.put("superAdmin", LoginAdminThreadLocal.get().isSuperAdmin());
+        map.put("admin", LoginAdminThreadLocal.get().getAdminId());
         return new ModelAndView("message/list", map);
     }
 

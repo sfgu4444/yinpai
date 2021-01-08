@@ -103,6 +103,7 @@ public class AdminService {
         BeanUtils.copyProperties(adminAddForm, adminEntity);
         adminEntity.setCreateTime(new Date());
         adminEntity.setUpdateTime(new Date());
+        adminEntity.setMoney(0);
         adminEntity.setAdminPass(ProjectUtil.password(adminAddForm.getAdminPass()));
         adminEntity.setAdminStatus(CommonEnum.YES.getCode());
         adminEntity.setBackgroundUrl(adminAddForm.getBackgroundUrl());
