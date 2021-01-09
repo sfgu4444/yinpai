@@ -3,11 +3,9 @@ package com.yinpai.server.service;
 import com.yinpai.server.domain.dto.PageResponse;
 import com.yinpai.server.domain.dto.fiter.BaseFilterDto;
 import com.yinpai.server.domain.entity.UserDeposit;
-import com.yinpai.server.domain.entity.UserPayRecord;
-import com.yinpai.server.domain.entity.admin.Admin;
 import com.yinpai.server.domain.repository.UserDepositRepository;
+import com.yinpai.server.domain.repository.UserOrderRepository;
 import com.yinpai.server.vo.PayDepositListVo;
-import com.yinpai.server.vo.PayRecordListVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
@@ -24,6 +22,7 @@ import java.util.List;
 public class UserDepositService {
 
     private final UserDepositRepository userDepositRepository;
+
 
     @Autowired
     public UserDepositService(UserDepositRepository userDepositRepository) {

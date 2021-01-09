@@ -1,5 +1,6 @@
 package com.yinpai.server.utils;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -72,6 +73,12 @@ public class DateUtil {
         return null;
     }
 
+    public static void main(String[] args) throws ParseException {
+        String a = "2020.12.30-17:20:56";
+        System.out.println(DateUtil.getYYMMDDHHMMSS(a));
+        //System.out.println(DateUtil.getMMDDYYHHMMSS(a));
+
+    }
     /**
      * MM-dd HH:mm:ss
      *
@@ -272,5 +279,19 @@ public class DateUtil {
     public static String getMMDDYYHHMMSS(Date source) {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd-HH:mm:ss");
         return sdf.format(source);
+    }
+
+    public static Date getMMDDYYHHMMSS(String source) throws ParseException {
+        SimpleDateFormat format =  new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Date date = format.parse(source);
+        return date;
+    }
+
+    public static Date getYYMMDDHHMMSS(String source) throws ParseException {
+        SimpleDateFormat format =  new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String TimeStart = source.replace("-", " ");
+        String time = TimeStart.replace(".", "-");
+        Date date =format.parse(time);
+        return date;
     }
 }

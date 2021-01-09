@@ -7,27 +7,21 @@ import com.google.gson.Gson;
 import com.yinpai.server.domain.dto.LoginUserInfoDto;
 import com.yinpai.server.domain.dto.PageResponse;
 import com.yinpai.server.domain.dto.fiter.BaseFilterDto;
-import com.yinpai.server.domain.entity.User;
-import com.yinpai.server.domain.entity.UserOrder;
-import com.yinpai.server.domain.entity.UserPayRecord;
-import com.yinpai.server.domain.entity.UserRechargeRecord;
+import com.yinpai.server.domain.entity.*;
 import com.yinpai.server.domain.entity.admin.Admin;
-import com.yinpai.server.domain.repository.UserOrderRepository;
-import com.yinpai.server.domain.repository.UserPayRecordRepository;
-import com.yinpai.server.domain.repository.UserRechargeRecordRepository;
-import com.yinpai.server.domain.repository.UserRepository;
+import com.yinpai.server.domain.repository.*;
 import com.yinpai.server.enums.PayStatus;
 import com.yinpai.server.exception.NotLoginException;
 import com.yinpai.server.exception.ProjectException;
 import com.yinpai.server.thread.threadlocal.LoginUserThreadLocal;
 import com.yinpai.server.utils.*;
+import com.yinpai.server.vo.PayDepositListVo;
 import com.yinpai.server.vo.PayRecordListVo;
 import com.yinpai.server.vo.WxPay.PayResultVo;
 import com.yinpai.server.vo.WxPay.WxPayResult;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
@@ -42,8 +36,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.math.BigDecimal;
-import java.net.URL;
-import java.net.URLConnection;
 import java.util.*;
 
 import static java.util.Calendar.MINUTE;
@@ -66,11 +58,14 @@ public class UserPayRecordService {
 
     private final WorksService worksService;
 
+    private final UserDepositRepository userDepositRepository;
+
     @Autowired
-    public UserPayRecordService(UserPayRecordRepository userPayRecordRepository, @Lazy AdminService adminService, @Lazy WorksService worksService) {
+    public UserPayRecordService(UserPayRecordRepository userPayRecordRepository, @Lazy AdminService adminService, @Lazy WorksService worksService, UserDepositRepository userDepositRepository) {
         this.userPayRecordRepository = userPayRecordRepository;
         this.adminService = adminService;
         this.worksService = worksService;
+        this.userDepositRepository = userDepositRepository;
     }
 
 
@@ -166,6 +161,7 @@ public class UserPayRecordService {
                             String returnXml = WXPayUtil.mapToXml(returnMap);
                             response.setContentType("text/xml");
                             log.warn(user.getUsername(), "用户充值成功");
+                            this.saveOrderLog(userOrder);
                             return returnXml;
                         }
                     }
@@ -273,6 +269,7 @@ public class UserPayRecordService {
                 Integer userId = Integer.parseInt(userOrder.getUserId());
                 User user = userRepository.findUserById(userId);
                 orderShip(user, userOrder);
+                this.saveOrderLog(userOrder);
                 return "success";
             }
         } else {
@@ -355,6 +352,7 @@ public class UserPayRecordService {
                     .orderStatus(PayStatus.topaid)
                     .build();
             UserOrder order = userOrderRepository.save(userOrder);
+            this.saveOrderLog(order);
             User user = userRepository.findUserById(loginUserInfoDto.getUserId());
             orderShip(user, order);
             payResultVo.setCode(HttpStatus.OK);
@@ -439,5 +437,22 @@ public class UserPayRecordService {
 
     public UserPayRecord findByIdNotNull(Integer id) {
         return userPayRecordRepository.findById(id).orElseThrow(() -> new ProjectException("支付记录不存在"));
+    }
+
+    /**
+     * 插入支付记录表
+     * @param userOrder
+     */
+    public void saveOrderLog(UserOrder userOrder){
+        log.info("【插入支付记录表】: {}",userOrder.getOrderId());
+        try {
+            UserDeposit dto = new UserDeposit();
+            dto.setPayMoney(userOrder.getTotalFee().intValue());
+            dto.setUserMoney(userOrder.getTotalFee().intValue());
+            dto.setCreateTime(new Date());
+            userDepositRepository.save(dto);
+        }catch (Exception e){
+            log.error("【插入支付记录表异常】: {}  {}",e.getMessage(),e);
+        }
     }
 }

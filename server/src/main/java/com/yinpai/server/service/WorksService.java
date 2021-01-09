@@ -297,8 +297,8 @@ public class WorksService {
         works.setLable(lable.getId());
         works.setType(vo.getType());
         works.setCoverImageUrl(vo.getCoverImageUrl());
-        works.setStatus(adminInfoDto.getIsAudit() == 1 ? CommonEnum.NO.getCode() : CommonEnum.YES.getCode());
-        Integer isFree = null == vo.getIsFree() ? 1 : vo.isFree;
+        works.setStatus(null == adminInfoDto.getIsAudit()||(adminInfoDto.getIsAudit() == 1) ? CommonEnum.NO.getCode() : CommonEnum.YES.getCode());
+        Integer isFree = (null == vo.getIsFree()) ? 1 : vo.getIsFree();
         works.setIsFree(isFree);
         if (isFree == 1) {
             works.setPrice(0);
