@@ -64,7 +64,7 @@ public class ReportService {
             vo.setType(w.getType());
             vo.setContent(w.getContent());
             vo.setCreateTime(w.getCreateTime());
-voList.add(vo);
+            voList.add(vo);
         });
         return new PageImpl<>(voList, reports.getPageable(), reports.getTotalElements());
     }

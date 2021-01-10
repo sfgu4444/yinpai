@@ -50,6 +50,7 @@ public class AdminController {
         Page<Admin> list = adminService.findFilterAll(conditionMap, request);
         map.put("info", list);
         map.put("html", PageUtil.pageHtml(list.getTotalElements(), page, size));
+        map.put("superAdmin", LoginAdminThreadLocal.get().isSuperAdmin());
         return new ModelAndView("admin/list", map);
     }
 

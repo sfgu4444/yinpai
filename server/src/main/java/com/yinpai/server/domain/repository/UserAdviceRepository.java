@@ -1,8 +1,12 @@
 package com.yinpai.server.domain.repository;
 
 import com.yinpai.server.domain.entity.UserAdvice;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+
+import java.util.List;
 
 /**
  * @author weilai
@@ -10,4 +14,6 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
  * @date 2020/10/6 12:13 上午
  */
 public interface UserAdviceRepository extends JpaRepository<UserAdvice, Integer>, JpaSpecificationExecutor<UserAdvice> {
+
+    Page<UserAdvice> findByUserIdIn(List<Integer> userIds, Pageable pageable);
 }

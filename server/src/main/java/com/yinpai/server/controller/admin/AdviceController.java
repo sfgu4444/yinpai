@@ -1,15 +1,14 @@
 package com.yinpai.server.controller.admin;
 
-import com.yinpai.server.domain.entity.User;
-import com.yinpai.server.service.UserService;
+import com.yinpai.server.log.WebLog;
+import com.yinpai.server.service.UserAdviceService;
 import com.yinpai.server.utils.PageUtil;
 import com.yinpai.server.utils.ResultUtil;
+import com.yinpai.server.vo.admin.Advice;
 import com.yinpai.server.vo.admin.ResultVO;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -17,19 +16,19 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * @author weilai
- * @email 352342845@qq.com
- * @date 2020/9/28 6:01 下午
+ * @program server
+ * @description: 建议反馈
+ * @author: liuzhenda
+ * @create: 2021/01/10 12:47
  */
-@Controller("adminUserController")
-@RequestMapping("/admin/user")
-public class UserController {
+@RestController
+@RequestMapping("/admin/advice")
+public class AdviceController {
 
-    private final UserService userService;
+    private final UserAdviceService userAdviceService;
 
-    @Autowired
-    public UserController(UserService userService) {
-        this.userService = userService;
+    public AdviceController(UserAdviceService userAdviceService) {
+        this.userAdviceService = userAdviceService;
     }
 
     @GetMapping("/list")
@@ -38,29 +37,16 @@ public class UserController {
                              Map<String, Object> map) {
         Sort sort = Sort.by(Sort.Direction.DESC, "id");
         PageRequest request = PageRequest.of(page - 1, size, sort);
-        HashMap<String, String> conditionMap = new HashMap<>();
-        conditionMap.put("userName", "like");
-        Page<User> list = userService.findFilterAll(conditionMap, request);
+        Page<Advice> list = userAdviceService.findFilterAll(request);
         map.put("info", list);
         map.put("html", PageUtil.pageHtml(list.getTotalElements(), page, size));
-        return new ModelAndView("user/list", map);
-    }
-
-    @PostMapping("/status")
-    @ResponseBody
-    public ResultVO changeAdminStatus(@RequestParam Integer id) {
-        Integer adminStatus = userService.changeUserStatus(id);
-        return ResultUtil.successData(adminStatus);
+        return new ModelAndView("advice/list", map);
     }
 
     @PostMapping("/delete")
     @ResponseBody
     public ResultVO delete(@RequestParam Integer id) {
-        userService.delete(id);
-        return ResultUtil.success("用户删除成功");
+        userAdviceService.delete(id);
+        return ResultUtil.success("删除成功");
     }
-
-
-
-
 }

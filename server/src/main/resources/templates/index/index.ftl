@@ -42,7 +42,7 @@
 <!-- 左侧菜单开始 -->
 <div class="left-nav">
     <div id="side-nav">
-    <#if superAdmin == true>
+   <#-- <#if superAdmin == true> -->
         <ul id="nav">
             <li>
                 <a href="javascript:;">
@@ -57,10 +57,16 @@
                             <cite>商家列表</cite>
                         </a>
                     </li>
+                     <li>
+                        <a _href="/admin/origin/list">
+                            <i class="iconfont"></i>
+                            <cite>原创入驻</cite>
+                        </a>
+                    </li>
                 </ul>
             </li>
         </ul>
-        </#if>
+      <#--   </#if> -->
         <ul id="nav">
             <li>
                 <a href="javascript:;">
@@ -123,6 +129,12 @@
                         <a _href="/admin/report/list">
                             <i class="iconfont"></i>
                             <cite>举报列表</cite>
+                        </a>
+                    </li>
+                     <li>
+                        <a _href="/admin/advice/list">
+                            <i class="iconfont"></i>
+                            <cite>意见反馈</cite>
                         </a>
                     </li>
                 </ul>

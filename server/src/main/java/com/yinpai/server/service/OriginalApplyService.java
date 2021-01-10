@@ -1,12 +1,19 @@
 package com.yinpai.server.service;
 import java.util.Date;
+import java.util.Map;
 
 import com.yinpai.server.domain.dto.LoginUserInfoDto;
 import com.yinpai.server.domain.entity.OriginalApply;
+import com.yinpai.server.domain.entity.User;
+import com.yinpai.server.domain.entity.UserAdvice;
 import com.yinpai.server.domain.repository.OriginalApplyRepository;
 import com.yinpai.server.exception.NotLoginException;
+import com.yinpai.server.exception.ProjectException;
 import com.yinpai.server.thread.threadlocal.LoginUserThreadLocal;
+import com.yinpai.server.utils.ProjectUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 /**
@@ -39,4 +46,18 @@ public class OriginalApplyService {
         originalApply.setCreateTime(new Date());
         originalApplyRepository.save(originalApply);
     }
+
+    public Page<OriginalApply> findFilterAll(Map<String, String> map, Pageable pageable) {
+        return originalApplyRepository.findAll(ProjectUtil.getSpecification(map), pageable);
+    }
+
+    public void delete(Integer id) {
+        OriginalApply originalApply = findByIdNotNull(id);
+        originalApplyRepository.delete(originalApply);
+    }
+
+    public OriginalApply findByIdNotNull(Integer id) {
+        return originalApplyRepository.findById(id).orElseThrow(() -> new ProjectException("原创不存在"));
+    }
+
 }

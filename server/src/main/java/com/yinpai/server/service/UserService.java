@@ -31,6 +31,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import javax.persistence.EntityNotFoundException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -204,5 +206,21 @@ public class UserService {
         user.setPhone(newPhone);
         user.setUsername(newPhone);
         userRepository.save(user);
+    }
+
+    public List<User> findByNicknameList(String nickName){
+        return userRepository.findByNickNameContaining(nickName);
+    }
+
+    public List<Integer> findByNicknameListId(String nickName){
+        List<Integer> userIdList = new ArrayList<>();
+        List<User> userList  = userRepository.findByNickNameContaining(nickName);
+        if(null == userList ||userList.size() == 0){
+            return userIdList;
+        }
+        userList.forEach(u -> {
+            userIdList.add(u.getId());
+        });
+        return userIdList;
     }
 }
