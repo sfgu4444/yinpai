@@ -87,6 +87,9 @@ public class AdminController {
         if (adminAddForm.getAdminPass() != null && !adminAddForm.getAdminPass().equals(adminAddForm.getAdminCheckPass())) {
             throw new ProjectException("两次密码不一致");
         }
+        if (null == adminAddForm.getAdminPass()) {
+            throw new ProjectException("密码不能为空");
+        }
         adminService.edit(adminAddForm);
         return ResultUtil.success("修改商家信息成功");
     }

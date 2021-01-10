@@ -75,4 +75,10 @@ public class LableController {
         return ResultUtil.success();
     }
 
+    @PostMapping("/delete")
+    @ResponseBody
+    public ResultVO delete(@RequestParam Integer id) {
+        lableService.delete(id);
+        return ResultUtil.success("作品删除成功");
+    }
 }

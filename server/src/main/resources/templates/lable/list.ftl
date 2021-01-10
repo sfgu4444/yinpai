@@ -117,7 +117,7 @@
     function member_del(obj,id){
         layer.confirm('确认要删除吗？',function(){
             $.ajax({
-                url:"/admin/admin/delete",
+                url:"/admin/lable/delete",
                 data:{"id":id,},
                 type:"post",
                 dataType:"json",

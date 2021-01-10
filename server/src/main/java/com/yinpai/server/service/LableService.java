@@ -66,4 +66,10 @@ public class LableService {
       return lableRepository.findAll();
     }
 
+
+    public void delete(Integer id) {
+        Lable lable = findByIdNotNull(id);
+        lableRepository.delete(lable);
+    }
+
 }
