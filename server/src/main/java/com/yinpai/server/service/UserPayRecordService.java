@@ -290,12 +290,10 @@ public class UserPayRecordService {
         Integer statusFont = (Integer) map.get("status");
         Calendar expire = getInstance();
         expire.add(MINUTE, 10);
-        String receipt = (String) map.get("receipt");
-        Map mapResult = JsonUtils.toObject(receipt, Map.class);
-        String inApp = (String) mapResult.get("in_app");
-        Map inAppResult = JsonUtils.toObject(inApp, Map.class);
-        Long orderId = (Long) inAppResult.get("transaction_id");
-        String price = (String) inAppResult.get("product_id");
+        LinkedHashMap mapResult = (LinkedHashMap) map.get("receipt");
+        List<LinkedHashMap> inAppResult = (List<LinkedHashMap>) mapResult.get("in_app");
+        Long orderId = Long.valueOf(inAppResult.get(0).get("transaction_id").toString());
+        String price = inAppResult.get(0).get("product_id").toString();
         String totalFee="";
         if(price != null && !"".equals(price)){
             for(int i=0;i<price.length();i++){
@@ -314,7 +312,8 @@ public class UserPayRecordService {
                     .totalFee(new BigDecimal(totalFee))
                     .ipAddress(ProjectUtil.getIpAddr())
                     .payPlatform("APPLE")
-                    .orderMetaData(receipt)
+                    //.orderMetaData(receipt)
+                    .orderMetaData(new Gson().toJson(mapResult))
                     .timeStart(DateUtil.getMMDDYYHHMMSS(new Date()))
                     .timeExpire(DateUtil.getMMDDYYHHMMSS(expire.getTime()))
                     .timeStamp(System.currentTimeMillis() + "")
@@ -343,7 +342,7 @@ public class UserPayRecordService {
                     .totalFee(new BigDecimal(totalFee))
                     .ipAddress(ProjectUtil.getIpAddr())
                     .payPlatform("APPLE")
-                    .orderMetaData(receipt)
+                    .orderMetaData(new Gson().toJson(mapResult))
                     .timeStart(DateUtil.getMMDDYYHHMMSS(new Date()))
                     .timeExpire(DateUtil.getMMDDYYHHMMSS(expire.getTime()))
                     .timeStamp(System.currentTimeMillis() + "")
