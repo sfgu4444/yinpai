@@ -57,12 +57,14 @@
                             <cite>商家列表</cite>
                         </a>
                     </li>
+                    <#if superAdmin == true>
                      <li>
                         <a _href="/admin/origin/list">
                             <i class="iconfont"></i>
                             <cite>原创入驻</cite>
                         </a>
                     </li>
+                    </#if>
                 </ul>
             </li>
         </ul>

@@ -346,9 +346,9 @@ public class UserPayRecordService {
                     .timeStart(DateUtil.getMMDDYYHHMMSS(new Date()))
                     .timeExpire(DateUtil.getMMDDYYHHMMSS(expire.getTime()))
                     .timeStamp(System.currentTimeMillis() + "")
-                    .orderPayStatus(1)
-                    .orderShipStatus(1)
-                    .orderStatus(PayStatus.topaid)
+                    .orderPayStatus(0)
+                    .orderShipStatus(0)
+                    .orderStatus(PayStatus.unpaid)
                     .build();
             UserOrder order = userOrderRepository.save(userOrder);
             this.saveOrderLog(order);

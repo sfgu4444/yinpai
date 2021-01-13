@@ -94,7 +94,7 @@
                     <input type="hidden" name="coverImageUrl" value="">
                     <img src="/static/images/camera.png" width="200" id="coverImageUrl">
                     <span class="layui-word-aux">
-                  上传的图片尺寸大小为380px * 260px
+                  <#-- 上传的图片尺寸大小为380px * 260px -->
                 </span>
                 </div>
             </div>
