@@ -180,6 +180,7 @@ public class UserPayRecordService {
         // todo 为了保存整数
         BigDecimal moneyCount = new BigDecimal(user.getMoney()).add(new BigDecimal(100));
         // BigDecimal moneyCount = new BigDecimal(user.getMoney()).add(money);
+        log.info("【添加拍币】 原 : {} ，现 : {}",user.getMoney(),moneyCount.intValue());
         user.setMoney(moneyCount.intValue());
         userRepository.save(user);
     }
@@ -286,6 +287,7 @@ public class UserPayRecordService {
         if (null == loginUserInfoDto) {
             throw new NotLoginException("用户必须登录!");
         }
+        log.info("【苹果支付】 userID : {}",loginUserInfoDto.getUserId());
         PayResultVo payResultVo = new PayResultVo();
         Integer statusFont = (Integer) map.get("status");
         Calendar expire = getInstance();
@@ -301,8 +303,8 @@ public class UserPayRecordService {
                     totalFee+=price.charAt(i);
                 }
             }
-
         }
+
         if (0 != statusFont) {
             //存储错误
             UserOrder userOrder = UserOrder.builder()
@@ -382,6 +384,7 @@ public class UserPayRecordService {
             userOrder.setOrderStatus(PayStatus.expaid);
             throw new RuntimeException("订单发货时异常");
         }
+
         return userOrderRepository.save(userOrder);
     }
 
@@ -449,6 +452,7 @@ public class UserPayRecordService {
             dto.setPayMoney(userOrder.getTotalFee().intValue());
             dto.setUserMoney(userOrder.getTotalFee().intValue());
             dto.setCreateTime(new Date());
+            dto.setUserId(Integer.valueOf(userOrder.getUserId()));
             userDepositRepository.save(dto);
         }catch (Exception e){
             log.error("【插入支付记录表异常】: {}  {}",e.getMessage(),e);

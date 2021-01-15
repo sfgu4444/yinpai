@@ -10,6 +10,7 @@ import com.yinpai.server.domain.entity.admin.Admin;
 import com.yinpai.server.domain.repository.UserFollowRepository;
 import com.yinpai.server.vo.IndexWorksVo;
 import com.yinpai.server.vo.UserFollowListVo;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
@@ -27,6 +28,7 @@ import java.util.stream.Collectors;
  * @email 352342845@qq.com
  * @date 2020/9/28 2:43 下午
  */
+@Slf4j
 @Service
 public class UserFollowService {
 
@@ -69,6 +71,7 @@ public class UserFollowService {
         List<UserFollowListVo> voList = new ArrayList<>();
         userFollowPage.forEach( f -> {
             UserFollowListVo vo = new UserFollowListVo();
+            log.info("【获取关注商家】 userid : {} , adminid : {}",followFilterDto.getUserId(),f.getAdminId());
             Admin admin = adminService.findByIdNotNull(f.getAdminId());
             if (admin != null) {
                 vo.setAdminId(admin.getId());

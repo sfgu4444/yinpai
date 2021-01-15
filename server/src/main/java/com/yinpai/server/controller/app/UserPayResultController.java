@@ -46,7 +46,7 @@ public class UserPayResultController {
     }
     @ApiOperation("供苹果确认订单")
     @PostMapping("/appleOrderDetermine")
-    //@WebLog(description = "供苹果确认订单")
+    @WebLog(description = "供苹果确认订单")
     public PayResultVo appleOrderDetermine(@RequestBody Map<String,Map<String,Object>> map) throws JSONException {
         return userPayRecordService.appleOrderDetermine(map.get("map"));
     }
