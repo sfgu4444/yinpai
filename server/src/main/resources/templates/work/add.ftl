@@ -271,6 +271,7 @@
             }
             ,error: function (){
                 layer.closeAll('loading'); //关闭loading
+
             }
         });
 
@@ -280,13 +281,16 @@
             ,field: 'file'
             ,done: function(res){
                 layer.closeAll('loading'); //关闭loading
-                if(res.code == 200){
+                console.log("上传图片返回结果 ：",res.data,res.code)
+                if(res.code == 200 && res.data.code == 200){
                     $('#cover img').attr({
                         'id': 'coverImageUrl',
                     });
                     $("input[name=coverImageUrl]").val(res.data.data);
+                    $('#coverImageUrl').attr('src', res.data.data);
                 }else{
-                    layer.msg(res.msg,{anim:6,time:2000});
+                    layer.msg(res.data.msg,{anim:6,time:2000});
+
                 }
             }
             ,before: function(obj){
@@ -294,9 +298,9 @@
                 layer.load(); //上传loading
 
                 //预读本地文件示例，不支持ie8
-                obj.preview(function(index, file, result){
-                    $('#coverImageUrl').attr('src', result); //图片链接（base64）
-                });
+             //  obj.preview(function(index, file, result){
+              //     $('#coverImageUrl').attr('src', result); //图片链接（base64）
+              // });
             }
             ,error: function (){
                 layer.closeAll('loading'); //关闭loading
@@ -315,20 +319,29 @@
                 layer.load();
             },
             done: function (res) {
-                $('#uploaderDetail').append(
-                    '<div id="" class="file-iteme">' +
-                    '<div class="handle"><i class="layui-icon">&#x1006;</i></div>' +
-                    '<img style="width: 100px;height: 100px;" src="' + res.data.data + '">' +
-                    '</div>'
-                );
-                goodsDetailNum += 1;
-                if (goodsDetailNum > 10) {
-                    $('#imagesResources').hide();
-                }
-                imageResourceList.push(res.data.data);
-                $('#goodsImagesDetail').val(JSON.stringify(imageResourceList));
+                if(res.code == 200 && res.data.code == 200){
+
+               $('#uploaderDetail').append(
+                                   '<div id="" class="file-iteme">' +
+                                   '<div class="handle"><i class="layui-icon">&#x1006;</i></div>' +
+                                   '<img style="width: 100px;height: 100px;" src="' + res.data.data + '">' +
+                                   '</div>'
+                               );
+                               goodsDetailNum += 1;
+                               if (goodsDetailNum > 10) {
+                                   $('#imagesResources').hide();
+                               }
+                               imageResourceList.push(res.data.data);
+                               $('#goodsImagesDetail').val(JSON.stringify(imageResourceList));
+                               layer.closeAll('loading');
+                               layer.msg('上传成功！', {icon: 1, time: 1000});
+
+                }else{
                 layer.closeAll('loading');
-                layer.msg('上传成功！', {icon: 1, time: 1000});
+                layer.msg(res.data.msg,{anim:6,time:2000});
+
+                }
+
             },
             error: function () {
                 layer.closeAll('loading');

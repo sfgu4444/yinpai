@@ -289,7 +289,11 @@ public class WorksService {
         works.setAdminId(adminInfoDto.getAdminId());
         works.setTitle(vo.getTitle());
         works.setContent(vo.getContent());
-        String content = vo.getTitle()+vo.getContent();
+        String title = vo.getTitle();
+        if(!filter.replaceSensitiveWord(title, 1, "*").equals(title)){
+            throw new ProjectException("检测到敏感词汇");
+        }
+        String content = vo.getContent();
         if(!filter.replaceSensitiveWord(content, 1, "*").equals(content)){
             throw new ProjectException("检测到敏感词汇");
         }

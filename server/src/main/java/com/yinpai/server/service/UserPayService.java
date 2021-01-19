@@ -211,6 +211,8 @@ public class UserPayService {
         UserPay userPay = userPayRepository.findByEntityIdAndUserIdAndType(adminId, userInfoDto.getUserId(), 2);
         if (userPay != null) {
             vo.setExpireTime(userPay.getExpireTime());
+            int surplus = DateUtil.getDayDiff(new Date(),userPay.getExpireTime());
+            vo.setSurplusDay(surplus);
         }
         return vo;
     }

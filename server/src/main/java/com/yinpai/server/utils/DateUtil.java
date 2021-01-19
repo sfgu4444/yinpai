@@ -75,8 +75,12 @@ public class DateUtil {
 
     public static void main(String[] args) throws ParseException {
         String a = "2020.12.30-17:20:56";
-        System.out.println(DateUtil.getYYMMDDHHMMSS(a));
+        //System.out.println(DateUtil.getYYMMDDHHMMSS(a));
         //System.out.println(DateUtil.getMMDDYYHHMMSS(a));
+
+       int aLong = getDayDiff(new Date(),new Date());
+        System.out.println(aLong);
+
 
     }
     /**
