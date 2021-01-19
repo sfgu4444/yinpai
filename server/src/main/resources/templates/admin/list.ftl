@@ -7,7 +7,12 @@
         <a href="">后台</a>
         <a href="">管理</a>
         <a>
+        <#if superAdmin == true>
           <cite>商家列表</cite></a>
+        </#if>
+        <#if superAdmin != true>
+             <cite>个人中心</cite></a>
+        </#if>
       </span>
     <a class="layui-btn layui-btn-small" style="line-height:1.6em;margin-top:3px;float:right" href="javascript:location.replace(location.href);" title="刷新">
         <i class="layui-icon" style="line-height:30px">ဂ</i></a>
