@@ -14,6 +14,7 @@ import com.github.binarywang.wxpay.service.WxPayService;
 import com.github.binarywang.wxpay.service.impl.WxPayServiceImpl;
 import com.yinpai.server.config.AlipayConfig;
 import com.yinpai.server.config.WechatConfig;
+import com.yinpai.server.config.WechatJsApiConfig;
 import com.yinpai.server.domain.dto.LoginUserInfoDto;
 import com.yinpai.server.domain.entity.*;
 import com.yinpai.server.domain.entity.admin.Admin;
@@ -27,19 +28,24 @@ import com.yinpai.server.exception.ProjectException;
 import com.yinpai.server.thread.threadlocal.LoginUserThreadLocal;
 import com.yinpai.server.utils.DateUtil;
 import com.yinpai.server.utils.IdWorker;
+import com.yinpai.server.utils.JsonUtils;
 import com.yinpai.server.utils.ProjectUtil;
 import com.yinpai.server.vo.AdminPayMethodVo;
 import com.yinpai.server.vo.admin.AdminAddForm;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
+import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Map;
 
 import static java.util.Calendar.MINUTE;
 import static java.util.Calendar.getInstance;
@@ -69,6 +75,9 @@ public class UserPayService {
     private final UserPayRecordService userPayRecordService;
 
     private final AdminRepository adminRepository;
+
+    @Autowired
+    private WechatJsApiConfig wechatJsApiConfig;
 
     @Autowired
     public UserPayService(UserPayRepository userPayRepository, UserService userService, WorksService worksService, AdminService adminService, WechatConfig wechatConfig, AlipayConfig alipayConfig, @Lazy UserPayRecordService userPayRecordService, AdminRepository adminRepository) {
@@ -236,14 +245,14 @@ public class UserPayService {
         return userOrderRepository.save(userOrder);
     }
 
-    //todo 微信订单生成
+
+
     public WxPayAppOrderResult wechatPayMoney(String amount) {
         //获取用户信息
         LoginUserInfoDto userInfoDto = LoginUserThreadLocal.get();
         if (userInfoDto == null) {
             throw new NotLoginException("请先登陆");
         }
-
         WxPayService wxPayService = new WxPayServiceImpl();
         WxPayConfig wxPayConfig = wechatConfig.appPayConfig();
         //交易,统一APP
@@ -288,7 +297,6 @@ public class UserPayService {
                     .orderMetaData("{\"sign\":\"" + wxPayAppOrderResult.getSign() + "\"}").build();
             save(userOrder);
             //todo 二次加密
-
             return wxPayAppOrderResult;
         } catch (WxPayException e) {
             // TODO
@@ -296,6 +304,73 @@ public class UserPayService {
             throw new ProjectException("微信统一下单失败");
         }
     }
+
+    @Value("${jsapi.AppSecret}")
+    private String AppSecret;
+
+    @Value("${jsapi.appid}")
+    private String appid;
+
+    //公众号支付
+    public String jsapiPayMoney(String amount) {
+        //获取用户信息
+        LoginUserInfoDto userInfoDto = LoginUserThreadLocal.get();
+        if (userInfoDto == null) {
+            throw new NotLoginException("请先登陆");
+        }
+        WxPayService wxPayService = new WxPayServiceImpl();
+        WxPayConfig wxPayConfig = wechatConfig.appPayConfig();
+        //交易,统一APP
+        wxPayConfig.setTradeType("APP");
+        wxPayService.setConfig(wxPayConfig);
+        //WxPayUnifiedOrderRequest:商品信息
+        WxPayUnifiedOrderRequest orderRequest = new WxPayUnifiedOrderRequest();
+        //商品描述
+        orderRequest.setBody("收集宝");
+        Long orderId = new IdWorker(1, 1, 1).nextId();
+        //商户订单号
+        orderRequest.setOutTradeNo(orderId + "");
+        //todo 上线使用price
+        BigDecimal price = new BigDecimal(amount).multiply(new BigDecimal(100));
+        //价钱
+        orderRequest.setTotalFee(1);
+        //ip地址
+        orderRequest.setSpbillCreateIp(ProjectUtil.getIpAddr());
+        SimpleDateFormat timeFormat = new SimpleDateFormat("yyyyMMddHHmmss");
+        Calendar expire = getInstance();
+        expire.add(MINUTE, 10);
+        //交易开始时间
+        orderRequest.setTimeStart(timeFormat.format(new Date()));
+        //交易结束时间
+        orderRequest.setTimeExpire(timeFormat.format(expire.getTime()));
+        try {
+            WxPayAppOrderResult wxPayAppOrderResult = wxPayService.createOrder(orderRequest);
+            //todo 生成订单信息
+            UserOrder userOrder = UserOrder.builder()
+                    .orderId(orderId)
+                    .userId(userInfoDto.getUserId()+"")
+                    .body("收集宝")
+                    .totalFee(new BigDecimal(1)) // todo 测试时使用
+                    .ipAddress(ProjectUtil.getIpAddr())
+                    .timeStart(DateUtil.getMMDDYYHHMMSS(new Date()))
+                    .timeExpire(DateUtil.getMMDDYYHHMMSS(expire.getTime()))
+                    .payPlatform("WeChatJsApiPay")
+                    .orderPayStatus(0)
+                    .orderShipStatus(0)
+                    .orderStatus(PayStatus.unpaid)
+                    .timeStamp(wxPayAppOrderResult.getTimeStamp())
+                    .orderMetaData("{\"sign\":\"" + wxPayAppOrderResult.getSign() + "\"}").build();
+            save(userOrder);
+            //todo 公众号二次加密
+            //return wxPayAppOrderResult;
+        } catch (WxPayException e) {
+            // TODO
+            log.error("【唤醒微信APP支付失败】订单ID：{}, 信息：{}",orderId, e.getMessage(),e);
+            throw new ProjectException("微信统一下单失败");
+        }
+        return "";
+    }
+
 
     public String aliPayMoney(String amount) {
         try {
@@ -365,5 +440,19 @@ public class UserPayService {
             log.error("【唤醒支付宝APP支付失败】订单ID：{}, 信息", e.getMessage(), e);
             throw new ProjectException("支付宝统一下单失败");
         }
+    }
+
+    @Autowired
+    private RestTemplate restTemplate;
+
+    public Map wechatAuth(String code) {
+        LoginUserInfoDto userInfoDto = LoginUserThreadLocal.get();
+        if (userInfoDto == null) {
+            throw new NotLoginException("请先登陆");
+        }
+        String format = MessageFormat.format("https://api.weixin.qq.com/sns/oauth2/access_token?appid={0}&secret={1}&code={2}&grant_type=authorization_code",
+                wechatJsApiConfig.getAppid(), wechatJsApiConfig.getAppSecret(), code);
+        String s = restTemplate.getForObject(format, String.class);
+        return JsonUtils.toObject(s, Map.class);
     }
 }

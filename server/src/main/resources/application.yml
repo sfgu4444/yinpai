@@ -37,6 +37,11 @@ wechat:
     opMchkey: bc56e221598fc34298c8af55f2cafff7
     opNotifyUrl: https://ypapi.phpisfuture.com/mall/pay/callbackWxAppPay
 
+jsapi:
+    appid: wx96095d1c2acffb94
+    EncodingAESKey: Qo5WWXRd1tc6lxmT14lWdJGfUjKELmL0m8GRUSdZAEN
+    AppSecret: 83888971018c3054bd1ad72f099edea8
+    notifyUrl: https://ypapi.phpisfuture.com/mall/pay/callbackjsApipayApp
 
 alipay:
     serverUrl: https://openapi.alipay.com/gateway.do
@@ -52,6 +57,7 @@ alipay:
 applepay:
     lineurl: https://buy.itunes.apple.com/verifyReceipt
     boxurl: https://sandbox.itunes.apple.com/verifyReceipt
+
 
 logging:
     file:

@@ -164,7 +164,7 @@
         </plugins>
         <resources>
             <resource>
-                <!--                <directory>company-service/src/main/resources</directory>-->
+                <!--<directory>company-service/src/main/resources</directory>-->
                 <directory>src/main/resources</directory>
                 <!-- 开启过滤替换功能-->
                 <filtering>true</filtering>

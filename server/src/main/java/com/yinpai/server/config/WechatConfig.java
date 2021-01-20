@@ -23,4 +23,5 @@ public class WechatConfig {
         wxPayConfig.setNotifyUrl(wechatAccountConfig.getOpNotifyUrl());
         return wxPayConfig;
     }
+
 }
