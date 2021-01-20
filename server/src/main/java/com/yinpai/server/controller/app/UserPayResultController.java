@@ -51,5 +51,13 @@ public class UserPayResultController {
         return userPayRecordService.appleOrderDetermine(map.get("map"));
     }
 
+    @ApiOperation("供苹果确认订单")
+    @PostMapping("/callbackjsApipayApp")
+    @WebLog(description = "供苹果确认订单")
+    public PayResultVo jsApiPayResult(@RequestBody Map<String,Map<String,Object>> map) throws JSONException {
+        return userPayRecordService.appleOrderDetermine(map.get("map"));
+    }
+
+
 
 }

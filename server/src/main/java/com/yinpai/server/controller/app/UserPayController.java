@@ -16,6 +16,8 @@ import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 /**
  * @author weilai
  * @email 352342845@qq.com
@@ -31,6 +33,14 @@ public class UserPayController {
     private final UserService userService;
 
     private final AdminService adminService;
+
+
+    @ApiOperation("微信公众号认证")
+    @PostMapping("/wechat/auth")
+    @WebLog(description = "微信公众号认证")
+    public String wechatAuth(String code) {
+        return userPayService.wechatAuth(code);
+    }
 
     @Autowired
     public UserPayController(UserPayService userPayService, UserService userService, AdminService adminService) {
@@ -84,4 +94,13 @@ public class UserPayController {
     public String aliPayMoney(@ApiParam("充值数量") @PathVariable String amount) {
         return userPayService.aliPayMoney(amount);
     }
+
+    @PostMapping("/wechat/jsapi/{amount}")
+    @ApiOperation("微信公众号充值拍币")
+    @WebLog(description = "微信公众号充值拍币")
+    public String jsapiPayMoney(@ApiParam("充值数量") @PathVariable String amount) {
+        return userPayService.jsapiPayMoney(amount);
+    }
+
+
 }
