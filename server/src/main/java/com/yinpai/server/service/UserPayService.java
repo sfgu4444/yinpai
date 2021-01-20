@@ -354,7 +354,7 @@ public class UserPayService {
                     .ipAddress(ProjectUtil.getIpAddr())
                     .timeStart(DateUtil.getMMDDYYHHMMSS(new Date()))
                     .timeExpire(DateUtil.getMMDDYYHHMMSS(expire.getTime()))
-                    .payPlatform("WeChatPay")
+                    .payPlatform("WeChatJsApiPay")
                     .orderPayStatus(0)
                     .orderShipStatus(0)
                     .orderStatus(PayStatus.unpaid)
@@ -445,7 +445,7 @@ public class UserPayService {
     @Autowired
     private RestTemplate restTemplate;
 
-    public String wechatAuth(String code) {
+    public Map wechatAuth(String code) {
         LoginUserInfoDto userInfoDto = LoginUserThreadLocal.get();
         if (userInfoDto == null) {
             throw new NotLoginException("请先登陆");
@@ -453,7 +453,6 @@ public class UserPayService {
         String format = MessageFormat.format("https://api.weixin.qq.com/sns/oauth2/access_token?appid={0}&secret={1}&code={2}&grant_type=authorization_code",
                 wechatJsApiConfig.getAppid(), wechatJsApiConfig.getAppSecret(), code);
         String s = restTemplate.getForObject(format, String.class);
-        Map map = JsonUtils.toObject(s, Map.class);
-        return (String) map.get("openId");
+        return JsonUtils.toObject(s, Map.class);
     }
 }

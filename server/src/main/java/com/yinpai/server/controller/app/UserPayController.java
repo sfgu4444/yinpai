@@ -38,7 +38,7 @@ public class UserPayController {
     @ApiOperation("微信公众号认证")
     @PostMapping("/wechat/auth")
     @WebLog(description = "微信公众号认证")
-    public String wechatAuth(String code) {
+    public Map wechatAuth(String code) {
         return userPayService.wechatAuth(code);
     }
 
