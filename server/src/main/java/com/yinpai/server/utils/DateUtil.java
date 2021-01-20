@@ -73,12 +73,6 @@ public class DateUtil {
         return null;
     }
 
-    public static void main(String[] args) throws ParseException {
-        String a = "2020.12.30-17:20:56";
-        System.out.println(DateUtil.getYYMMDDHHMMSS(a));
-        //System.out.println(DateUtil.getMMDDYYHHMMSS(a));
-
-    }
     /**
      * MM-dd HH:mm:ss
      *
@@ -282,16 +276,24 @@ public class DateUtil {
     }
 
     public static Date getMMDDYYHHMMSS(String source) throws ParseException {
-        SimpleDateFormat format =  new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         Date date = format.parse(source);
         return date;
     }
 
     public static Date getYYMMDDHHMMSS(String source) throws ParseException {
-        SimpleDateFormat format =  new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         String TimeStart = source.replace("-", " ");
         String time = TimeStart.replace(".", "-");
-        Date date =format.parse(time);
+        Date date = format.parse(time);
         return date;
+    }
+
+    public static boolean isNow(Date date) {
+        Date now = new Date();
+        SimpleDateFormat sf = new SimpleDateFormat("yyyyMMdd");
+        String nowDay = sf.format(now);
+        String day = sf.format(date);
+        return day.equals(nowDay);
     }
 }

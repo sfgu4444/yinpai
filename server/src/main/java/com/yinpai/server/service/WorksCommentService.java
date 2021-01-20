@@ -145,7 +145,7 @@ public class WorksCommentService {
         WorksComment worksComment = new WorksComment();
         worksComment.setWorkId(workId);
         worksComment.setUserId(userInfoDto.getUserId());
-        worksComment.setContent(filter.replaceSensitiveWord(content, 1, "*"));
+        worksComment.setContent(filter.replaceSensitiveWord(content, 2, "*"));
         worksComment.setAdminId(works.getAdminId());
         worksComment.setCreateTime(new Date());
         WorksComment result = worksCommentRepository.save(worksComment);

@@ -45,18 +45,37 @@
    <#-- <#if superAdmin == true> -->
         <ul id="nav">
             <li>
+            <#if superAdmin == true>
                 <a href="javascript:;">
                     <i class="iconfont"></i>
                     <cite>商家管理</cite>
                     <i class="iconfont nav_right">&#xe697;</i>
                 </a>
+                </#if>
+                <#if superAdmin != true>
+                <a href="javascript:;">
+                                    <i class="iconfont"></i>
+                                    <cite>个人中心</cite>
+                                    <i class="iconfont nav_right">&#xe697;</i>
+                                </a>
+                                </#if>
                 <ul class="sub-menu">
+                <#if superAdmin == true>
                     <li>
                         <a _href="/admin/admin/list">
                             <i class="iconfont"></i>
                             <cite>商家列表</cite>
                         </a>
                     </li>
+                    </#if>
+                   <#if superAdmin != true>
+                    <li>
+                        <a _href="/admin/admin/list">
+                            <i class="iconfont"></i>
+                            <cite>个人中心</cite>
+                        </a>
+                    </li>
+                    </#if>
                     <#if superAdmin == true>
                      <li>
                         <a _href="/admin/origin/list">

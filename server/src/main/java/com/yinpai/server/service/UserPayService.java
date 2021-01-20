@@ -139,7 +139,7 @@ public class UserPayService {
         userPayRecord.setCreateTime(new Date());
         userPayRecordService.save(userPayRecord);
         Admin admin = adminService.findByIdNotNull(works.getAdminId());
-        admin.setMoney(admin.getMoney()+works.getPrice());
+        admin.setMoney(admin.getMoney() + works.getPrice());
         adminRepository.save(admin);
     }
 
@@ -203,7 +203,7 @@ public class UserPayService {
         userPayRecord.setMoney(price);
         userPayRecord.setCreateTime(new Date());
         userPayRecordService.save(userPayRecord);
-        admin.setMoney(admin.getMoney()+price);
+        admin.setMoney(admin.getMoney() + price);
         adminRepository.save(admin);
     }
 
@@ -220,6 +220,20 @@ public class UserPayService {
         UserPay userPay = userPayRepository.findByEntityIdAndUserIdAndType(adminId, userInfoDto.getUserId(), 2);
         if (userPay != null) {
             vo.setExpireTime(userPay.getExpireTime());
+            int surplus = 0;
+            if(null != userPay.getExpireTime()){
+                surplus = DateUtil.getDayDiff(new Date(), userPay.getExpireTime());
+                if(surplus <= 0){
+                   surplus = 0;
+                }
+                if(surplus == 0){
+                    if(DateUtil.isNow(userPay.getExpireTime())){
+                        // 时间是当天的话 加 1
+                        surplus = surplus + 1;
+                    }
+                }
+            }
+            vo.setSurplusDay(surplus);
         }
         return vo;
     }
@@ -269,7 +283,7 @@ public class UserPayService {
             //todo 生成订单信息
             UserOrder userOrder = UserOrder.builder()
                     .orderId(orderId)
-                    .userId(userInfoDto.getUserId()+"")
+                    .userId(userInfoDto.getUserId() + "")
                     .body("收集宝")
                     .totalFee(new BigDecimal(1)) // todo 测试时使用
                     .ipAddress(ProjectUtil.getIpAddr())
@@ -286,7 +300,7 @@ public class UserPayService {
             return wxPayAppOrderResult;
         } catch (WxPayException e) {
             // TODO
-            log.error("【唤醒微信APP支付失败】订单ID：{}, 信息：{}",orderId, e.getMessage(),e);
+            log.error("【唤醒微信APP支付失败】订单ID：{}, 信息：{}", orderId, e.getMessage(), e);
             throw new ProjectException("微信统一下单失败");
         }
     }
@@ -360,70 +374,70 @@ public class UserPayService {
 
     public String aliPayMoney(String amount) {
         try {
-        //获取用户信息
-        LoginUserInfoDto userInfoDto = LoginUserThreadLocal.get();
-        if (userInfoDto == null) {
-            throw new NotLoginException("请先登陆");
-        }
-        AlipayClient alipayClient = new DefaultAlipayClient(
-                alipayConfig.getServerUrl(),
-                alipayConfig.getAppId(),    //app_id
-                alipayConfig.getAppPrivateKey(),
-                "json",         //format
-                alipayConfig.getCharset(),    //charset
-                alipayConfig.getAlipayPublicKey(),
-                alipayConfig.getSignType());    //sign_type
-        //实例化具体API对应的request类,类名称和接口名称对应,当前调用接口名称：alipay.trade.app.pay
-        AlipayTradeAppPayRequest request = new AlipayTradeAppPayRequest();
-        //SDK已经封装掉了公共参数，这里只需要传入业务参数。以下方法为sdk的model入参方式(model和biz_content同时存在的情况下取biz_content)。
-        AlipayTradeAppPayModel model = new AlipayTradeAppPayModel();
-        model.setBody("收集宝");
-        model.setSubject("购买商品");
-        IdWorker idWorker = new IdWorker(1, 1, 1);
-        long orderId = idWorker.nextId();
-        model.setOutTradeNo(orderId+"");
-        model.setTimeoutExpress(alipayConfig.getTimeoutExpress());
-        // TODO 订单总金额,暂时用1 ,生产使用 amount
-        model.setTotalAmount("0.01");
-        model.setProductCode(orderId+"");
-        //创建订单
-        {
-            Calendar expire = getInstance();
-            expire.add(MINUTE, 10);
-            UserOrder userOrder = UserOrder.builder()
-                    .orderId(orderId)
-                    .userId(userInfoDto.getUserId() + "")
-                    .body("收集宝")
-                    // TODO: 2020/12/14 支付宝订单金额单位是元  订单内是分  (需要*100转换)
-                    .totalFee(new BigDecimal(1))
-                    .ipAddress(ProjectUtil.getIpAddr())
-                    .payPlatform("AliPay")
-                    .timeStart(DateUtil.getMMDDYYHHMMSS(new Date()))
-                    .timeExpire(DateUtil.getMMDDYYHHMMSS(expire.getTime()))
-                    .timeStamp(System.currentTimeMillis()+"")
-                    .orderPayStatus(0)
-                    .orderShipStatus(0)
-                    .orderStatus(PayStatus.unpaid)
-                    .build();
-            userOrderRepository.save(userOrder);
-        }
+            //获取用户信息
+            LoginUserInfoDto userInfoDto = LoginUserThreadLocal.get();
+            if (userInfoDto == null) {
+                throw new NotLoginException("请先登陆");
+            }
+            AlipayClient alipayClient = new DefaultAlipayClient(
+                    alipayConfig.getServerUrl(),
+                    alipayConfig.getAppId(),    //app_id
+                    alipayConfig.getAppPrivateKey(),
+                    "json",         //format
+                    alipayConfig.getCharset(),    //charset
+                    alipayConfig.getAlipayPublicKey(),
+                    alipayConfig.getSignType());    //sign_type
+            //实例化具体API对应的request类,类名称和接口名称对应,当前调用接口名称：alipay.trade.app.pay
+            AlipayTradeAppPayRequest request = new AlipayTradeAppPayRequest();
+            //SDK已经封装掉了公共参数，这里只需要传入业务参数。以下方法为sdk的model入参方式(model和biz_content同时存在的情况下取biz_content)。
+            AlipayTradeAppPayModel model = new AlipayTradeAppPayModel();
+            model.setBody("收集宝");
+            model.setSubject("购买商品");
+            IdWorker idWorker = new IdWorker(1, 1, 1);
+            long orderId = idWorker.nextId();
+            model.setOutTradeNo(orderId + "");
+            model.setTimeoutExpress(alipayConfig.getTimeoutExpress());
+            // TODO 订单总金额,暂时用1 ,生产使用 amount
+            model.setTotalAmount("0.01");
+            model.setProductCode(orderId + "");
+            //创建订单
+            {
+                Calendar expire = getInstance();
+                expire.add(MINUTE, 10);
+                UserOrder userOrder = UserOrder.builder()
+                        .orderId(orderId)
+                        .userId(userInfoDto.getUserId() + "")
+                        .body("收集宝")
+                        // TODO: 2020/12/14 支付宝订单金额单位是元  订单内是分  (需要*100转换)
+                        .totalFee(new BigDecimal(1))
+                        .ipAddress(ProjectUtil.getIpAddr())
+                        .payPlatform("AliPay")
+                        .timeStart(DateUtil.getMMDDYYHHMMSS(new Date()))
+                        .timeExpire(DateUtil.getMMDDYYHHMMSS(expire.getTime()))
+                        .timeStamp(System.currentTimeMillis() + "")
+                        .orderPayStatus(0)
+                        .orderShipStatus(0)
+                        .orderStatus(PayStatus.unpaid)
+                        .build();
+                userOrderRepository.save(userOrder);
+            }
 
-        /*
-         * 1.电脑网站支付产品alipay.trade.page.pay接口中，product_code为：FAST_INSTANT_TRADE_PAY
-         * 2.手机网站支付产品alipay.trade.wap.pay接口中，product_code为：QUICK_WAP_WAY
-         * 3.当面付条码支付产品alipay.trade.pay接口中，product_code为：FACE_TO_FACE_PAYMENT
-         * 4.APP支付产品alipay.trade.app.pay接口中，product_code为：QUICK_MSECURITY_PAY
-         */
-        model.setProductCode("QUICK_MSECURITY_PAY");
-        request.setBizModel(model);
-        //支付宝异步回调接口
-        request.setNotifyUrl(alipayConfig.getNotifyUrl());
+            /*
+             * 1.电脑网站支付产品alipay.trade.page.pay接口中，product_code为：FAST_INSTANT_TRADE_PAY
+             * 2.手机网站支付产品alipay.trade.wap.pay接口中，product_code为：QUICK_WAP_WAY
+             * 3.当面付条码支付产品alipay.trade.pay接口中，product_code为：FACE_TO_FACE_PAYMENT
+             * 4.APP支付产品alipay.trade.app.pay接口中，product_code为：QUICK_MSECURITY_PAY
+             */
+            model.setProductCode("QUICK_MSECURITY_PAY");
+            request.setBizModel(model);
+            //支付宝异步回调接口
+            request.setNotifyUrl(alipayConfig.getNotifyUrl());
             //这里和普通的接口调用不同，使用的是sdkExecute
             AlipayTradeAppPayResponse response = alipayClient.sdkExecute(request);
             //记录支付记录,同微信一致
             return response.getBody();
         } catch (AlipayApiException e) {
-            log.error("【唤醒支付宝APP支付失败】订单ID：{}, 信息", e.getMessage(),e);
+            log.error("【唤醒支付宝APP支付失败】订单ID：{}, 信息", e.getMessage(), e);
             throw new ProjectException("支付宝统一下单失败");
         }
     }

@@ -6,6 +6,7 @@ import com.yinpai.server.exception.ProjectException;
 import com.yinpai.server.service.AliyunOssService;
 import com.yinpai.server.utils.ResultUtil;
 import com.yinpai.server.vo.admin.ResultVO;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -13,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Random;
@@ -23,6 +26,7 @@ import java.util.UUID;
  * @email 352342845@qq.com
  * @date 2020/9/28 11:00 下午
  */
+@Slf4j
 @RestController
 public class UploadController {
 
@@ -42,6 +46,11 @@ public class UploadController {
             throw new MethodArgumentCheckException("未获取到文件信息");
         }
         try {
+            long size = file.getSize() / 1024; //kb
+            if (size > 5120) { //判断图片大小 单位Kb
+                //throw new MethodArgumentCheckException("图片大小不能超过5MB");
+                return ResultUtil.error(1001,"图片大小不能超过5MB");
+            }
             String originalFilename = file.getOriginalFilename();
             String fileName = StringUtils.isEmpty(originalFilename) ? file.getName() : originalFilename;
             String suffix = fileName.substring(fileName.lastIndexOf("."));
@@ -57,6 +66,12 @@ public class UploadController {
     public ResultVO uploadWorks(@RequestParam("folder") Long folder, @RequestParam(value = "file", required = false) MultipartFile file) {
         if (file == null) {
             throw new MethodArgumentCheckException("未获取到文件信息");
+        }
+        long size = file.getSize() / 1024; //kb
+        log.info("【works file upload size】: {}",size);
+        if (size > 5120) { //判断图片大小 单位Kb
+           // throw new MethodArgumentCheckException("图片大小不能超过5MB");
+            return ResultUtil.error(1001,"图片大小不能超过5MB");
         }
         try {
             String originalFilename = file.getOriginalFilename();

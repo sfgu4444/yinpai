@@ -15,8 +15,11 @@ import java.util.Date;
 @ApiModel("商家可支付方式")
 public class AdminPayMethodVo {
 
-    @ApiModelProperty("VIP剩余到期时间(null或者小于当前时间则为0天)")
+    @ApiModelProperty("VIP到期时间(null或者小于当前时间则为0天)")
     private Date expireTime;
+
+    @ApiModelProperty("VIP剩余天数(null或者小于当前时间则为0天)")
+    private Integer surplusDay;
 
     @ApiModelProperty("月付价格（null或小于等于0为没开通此方式）")
     private Integer monthPayPrice;
