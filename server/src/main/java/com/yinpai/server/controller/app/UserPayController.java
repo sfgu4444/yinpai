@@ -1,5 +1,6 @@
 package com.yinpai.server.controller.app;
 
+import com.alibaba.fastjson.JSONObject;
 import com.github.binarywang.wxpay.bean.order.WxPayAppOrderResult;
 import com.yinpai.server.domain.dto.LoginUserInfoDto;
 import com.yinpai.server.domain.entity.User;
@@ -10,12 +11,16 @@ import com.yinpai.server.service.UserService;
 import com.yinpai.server.service.AdminService;
 import com.yinpai.server.thread.threadlocal.LoginUserThreadLocal;
 import com.yinpai.server.vo.AdminPayMethodVo;
+import com.yinpai.server.vo.WxPay.JSpayInfo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
 import java.util.Map;
 
 /**
@@ -23,6 +28,7 @@ import java.util.Map;
  * @email 352342845@qq.com
  * @date 2020/9/29 11:17 下午
  */
+@Slf4j
 @RestController
 @RequestMapping("/user/pay")
 @Api(tags = "用户支付相关")
@@ -38,8 +44,10 @@ public class UserPayController {
     @ApiOperation("微信公众号认证")
     @PostMapping("/wechat/auth")
     @WebLog(description = "微信公众号认证")
-    public Map wechatAuth(String code) {
-        return userPayService.wechatAuth(code);
+    @CrossOrigin
+    public Map<String, Object> wechatAuth(JSpayInfo jSpayInfo) throws IOException {
+
+        return userPayService.wechatAuth(jSpayInfo.getCode(),jSpayInfo.getTotalFee());
     }
 
     @Autowired

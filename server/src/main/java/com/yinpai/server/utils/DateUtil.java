@@ -296,5 +296,4 @@ public class DateUtil {
         String day = sf.format(date);
         return day.equals(nowDay);
     }
-
 }

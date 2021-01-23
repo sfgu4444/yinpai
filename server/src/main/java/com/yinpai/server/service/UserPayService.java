@@ -9,9 +9,11 @@ import com.alipay.api.response.AlipayTradeAppPayResponse;
 import com.github.binarywang.wxpay.bean.order.WxPayAppOrderResult;
 import com.github.binarywang.wxpay.bean.request.WxPayUnifiedOrderRequest;
 import com.github.binarywang.wxpay.config.WxPayConfig;
+import com.github.binarywang.wxpay.constant.WxPayConstants;
 import com.github.binarywang.wxpay.exception.WxPayException;
 import com.github.binarywang.wxpay.service.WxPayService;
 import com.github.binarywang.wxpay.service.impl.WxPayServiceImpl;
+import com.google.gson.Gson;
 import com.yinpai.server.config.AlipayConfig;
 import com.yinpai.server.config.WechatConfig;
 import com.yinpai.server.config.WechatJsApiConfig;
@@ -26,13 +28,16 @@ import com.yinpai.server.exception.NotAcceptableException;
 import com.yinpai.server.exception.NotLoginException;
 import com.yinpai.server.exception.ProjectException;
 import com.yinpai.server.thread.threadlocal.LoginUserThreadLocal;
-import com.yinpai.server.utils.DateUtil;
-import com.yinpai.server.utils.IdWorker;
-import com.yinpai.server.utils.JsonUtils;
-import com.yinpai.server.utils.ProjectUtil;
+import com.yinpai.server.utils.*;
 import com.yinpai.server.vo.AdminPayMethodVo;
 import com.yinpai.server.vo.admin.AdminAddForm;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
@@ -40,13 +45,17 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
+import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.nio.charset.Charset;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Map;
+import java.util.*;
 
+import static com.yinpai.server.service.WXJSPayService.*;
 import static java.util.Calendar.MINUTE;
 import static java.util.Calendar.getInstance;
 
@@ -445,14 +454,47 @@ public class UserPayService {
     @Autowired
     private RestTemplate restTemplate;
 
-    public Map wechatAuth(String code) {
+    public Map<String, Object> wechatAuth(String code,Integer totalFee) throws IOException {
         LoginUserInfoDto userInfoDto = LoginUserThreadLocal.get();
         if (userInfoDto == null) {
             throw new NotLoginException("请先登陆");
         }
+        String ipAddr = ProjectUtil.getIpAddr();
+        log.info("【支付用户IP地址】: {}",ipAddr);
         String format = MessageFormat.format("https://api.weixin.qq.com/sns/oauth2/access_token?appid={0}&secret={1}&code={2}&grant_type=authorization_code",
-                wechatJsApiConfig.getAppid(), wechatJsApiConfig.getAppSecret(), code);
+               "wx96095d1c2acffb94","83888971018c3054bd1ad72f099edea8", code);
         String s = restTemplate.getForObject(format, String.class);
-        return JsonUtils.toObject(s, Map.class);
+        log.info("【openid 返回结果 】: {}",new Gson().toJson(s));
+        Map<String,String> codeMap = JsonUtils.toObject(s, Map.class);
+        IdWorker idWorker = new IdWorker(1, 1, 1);
+        long orderId = idWorker.nextId();
+        String body = "公众号支付";            // 商家自己随便写的消息
+        String out_trade_no = String.valueOf(orderId);  // 订单ID
+        totalFee = totalFee*100; // 金额转成分  // 金额
+        String userIp = "111.204.59.194"; // 用户IP地址
+        //String userIp = getIpAddr(request); // 用户IP地址
+        String openId = codeMap.get("openid");  // code 请求返回的ID
+        String s1 = unifiedOrder(body,out_trade_no,totalFee,ipAddr,openId); // 获取预支付结果
+        log.info("【预支付返回结果 】: {}",new Gson().toJson(s1));
+        Map<String, Object> mapMap = getPayMap(s1);
+        //todo 生成订单信息
+
+//        UserOrder userOrder = UserOrder.builder()
+//                .orderId(orderId)
+//                .userId(userInfoDto.getUserId() + "")
+//                .body("收集宝")
+//                .totalFee(new BigDecimal(1)) // todo 测试时使用
+//                .ipAddress(ProjectUtil.getIpAddr())
+//                .timeStart(DateUtil.getMMDDYYHHMMSS(new Date()))
+//                .timeExpire(DateUtil.getMMDDYYHHMMSS(new Date()))
+//                .payPlatform("JSAPIPay")
+//                .orderPayStatus(0)
+//                .orderShipStatus(0)
+//                .orderStatus(PayStatus.unpaid)
+//                .timeStamp(DateUtil.getMMDDYYHHMMSS(new Date()))
+//                .orderMetaData("{\"sign\":\"" + mapMap.get("paySign") + "\"}").build();
+//        save(userOrder);
+        return  mapMap;// 解析xml 返回 map
     }
+
 }
