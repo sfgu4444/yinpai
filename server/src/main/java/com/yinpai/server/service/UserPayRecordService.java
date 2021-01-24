@@ -180,7 +180,7 @@ public class UserPayRecordService {
         // todo 为了保存整数
         BigDecimal moneyCount = new BigDecimal(user.getMoney()).add(new BigDecimal(100));
         // BigDecimal moneyCount = new BigDecimal(user.getMoney()).add(money);
-        log.info("【添加拍币】 原 : {} ，现 : {}",user.getMoney(),moneyCount.intValue());
+        log.info("【添加拍币】 原 : {} ，现 : {}", user.getMoney(), moneyCount.intValue());
         user.setMoney(moneyCount.intValue());
         userRepository.save(user);
     }
@@ -239,7 +239,7 @@ public class UserPayRecordService {
     }
 
     //支付宝回调接口
-    public String AliPayAppPayResult(HttpServletRequest request) throws IOException {
+    public String AliPayAppPayResult(HttpServletRequest request) {
         Map<String, String> map = convertRequestParamsToMap(request);
         log.info("【支付宝结果回调】 {}", new Gson().toJson(map));
         //调用SDK验证签名
@@ -282,12 +282,12 @@ public class UserPayRecordService {
     }
 
 
-    public PayResultVo appleOrderDetermine(Map<String, Object> map) throws JSONException {
+    public PayResultVo appleOrderDetermine(Map<String, Object> map) {
         LoginUserInfoDto loginUserInfoDto = LoginUserThreadLocal.get();
         if (null == loginUserInfoDto) {
             throw new NotLoginException("用户必须登录!");
         }
-        log.info("【苹果支付】 userID : {}",loginUserInfoDto.getUserId());
+        log.info("【苹果支付】 userID : {}", loginUserInfoDto.getUserId());
         PayResultVo payResultVo = new PayResultVo();
         Integer statusFont = (Integer) map.get("status");
         Calendar expire = getInstance();
@@ -296,11 +296,11 @@ public class UserPayRecordService {
         List<LinkedHashMap> inAppResult = (List<LinkedHashMap>) mapResult.get("in_app");
         Long orderId = Long.valueOf(inAppResult.get(0).get("transaction_id").toString());
         String price = inAppResult.get(0).get("product_id").toString();
-        String totalFee="";
-        if(price != null && !"".equals(price)){
-            for(int i=0;i<price.length();i++){
-                if(price.charAt(i)>=48 && price.charAt(i)<=57){
-                    totalFee+=price.charAt(i);
+        String totalFee = "";
+        if (price != null && !"".equals(price)) {
+            for (int i = 0; i < price.length(); i++) {
+                if (price.charAt(i) >= 48 && price.charAt(i) <= 57) {
+                    totalFee += price.charAt(i);
                 }
             }
         }
@@ -413,19 +413,20 @@ public class UserPayRecordService {
 
     /**
      * todo 没写查询
+     *
      * @param map
      * @param pageable
      * @return
      */
     public Page<UserPayRecord> findFilterAll(Map<String, String> map, Pageable pageable) {
-        Page<UserPayRecord> recordRepositoryAll =  userPayRecordRepository.findAll(ProjectUtil.getSpecification(map), pageable);
-        for (UserPayRecord userPayRecord : recordRepositoryAll){
-            User user  = userRepository.findUserById(userPayRecord.getUserId());
-            if(null != user){
+        Page<UserPayRecord> recordRepositoryAll = userPayRecordRepository.findAll(ProjectUtil.getSpecification(map), pageable);
+        for (UserPayRecord userPayRecord : recordRepositoryAll) {
+            User user = userRepository.findUserById(userPayRecord.getUserId());
+            if (null != user) {
                 userPayRecord.setUserName(user.getUsername());
             }
             Admin admin = adminService.findById(userPayRecord.getAdminId());
-            if(null != admin){
+            if (null != admin) {
                 userPayRecord.setAdminName(admin.getAdminName());
             }
         }
@@ -443,10 +444,11 @@ public class UserPayRecordService {
 
     /**
      * 插入支付记录表
+     *
      * @param userOrder
      */
-    public void saveOrderLog(UserOrder userOrder){
-        log.info("【插入支付记录表】: {}",userOrder.getOrderId());
+    public void saveOrderLog(UserOrder userOrder) {
+        log.info("【插入支付记录表】: {}", userOrder.getOrderId());
         try {
             UserDeposit dto = new UserDeposit();
             dto.setPayMoney(userOrder.getTotalFee().intValue());
@@ -454,12 +456,12 @@ public class UserPayRecordService {
             dto.setCreateTime(new Date());
             dto.setUserId(Integer.valueOf(userOrder.getUserId()));
             userDepositRepository.save(dto);
-        }catch (Exception e){
-            log.error("【插入支付记录表异常】: {}  {}",e.getMessage(),e);
+        } catch (Exception e) {
+            log.error("【插入支付记录表异常】: {}  {}", e.getMessage(), e);
         }
     }
 
-    public String jsApiPayResult(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    public void jsApiPayResult(HttpServletRequest request, HttpServletResponse response) throws IOException {
         //接收xml
         ServletInputStream is = request.getInputStream();
         //将InputStream转换成String
@@ -482,6 +484,55 @@ public class UserPayRecordService {
         }
         resXml = sb.toString();
         log.info("【公众号微信回调】: {}", resXml);
-        return "";
+        try {
+            Map<String, String> notifyMap = WXPayUtil.xmlToMap(resXml);
+            String sign = notifyMap.get("sign");
+            notifyMap = PayUtil.paraFilter(notifyMap);
+            String returnMap = "";
+            if ("SUCCESS".equals(notifyMap.get("result_code")) && "SUCCESS".equals(notifyMap.get("return_code"))) {
+                String orderId = notifyMap.get("out_trade_no");
+                Optional<UserOrder> optional = userOrderRepository.findById(Long.parseLong(orderId));
+                if (optional.isPresent()) {
+                    UserOrder userOrder = optional.get();
+                    log.info("索取订单数据:{}", userOrder);
+                    String total_fee = notifyMap.get("total_fee");
+                    int retval = userOrder.getTotalFee().compareTo(new BigDecimal(total_fee));
+                    log.info("【retval】: {} : 【userOrder】 , {} , 【total_fee】 : {} ,【orderPayStatus】 : {} ,【sign】: {} ,【订单ID】: {}", retval, userOrder.getTotalFee(), total_fee, userOrder.getOrderPayStatus(), sign, orderId);
+                    //转换
+                    String stringA = PayUtil.createLinkString(notifyMap);
+                    //拼接API密钥
+                    String signResult = PayUtil.sign(stringA, opMchkey, "UTF-8").toUpperCase();
+                    if (sign.equals(signResult)) {
+                        if (retval == 0) {
+                            log.info("订单状态:{}", userOrder.getOrderPayStatus());
+                            if (userOrder.getOrderPayStatus() == 0) {
+                                //更新订单状态
+                                userOrder.setOrderPayStatus(1);
+                                //添加用户余额,获取当前充值人
+                                String userId = userOrder.getUserId();
+                                User user = userRepository.findById(Integer.valueOf(userId)).orElseGet(User::new);
+                                if (ObjectUtils.isNotEmpty(user)) {
+                                    //添加余额
+                                    orderShip(user, userOrder);
+                                }
+                                returnMap = "<xml>" + "<return_code><![CDATA[SUCCESS]]></return_code>"
+                                        + "<return_msg><![CDATA[OK]]></return_msg>" + "</xml> ";
+                            }
+                        }
+                    }
+                }
+            } else {
+                returnMap = "<xml>" + "<return_code><![CDATA[FAIL]]></return_code>"
+                        + "<return_msg><![CDATA[报文为空]]></return_msg>" + "</xml> ";
+            }
+            BufferedOutputStream out = new BufferedOutputStream(
+                    response.getOutputStream());
+            out.write(returnMap.getBytes());
+            out.flush();
+            out.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
+
