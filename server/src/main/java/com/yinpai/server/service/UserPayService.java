@@ -230,13 +230,13 @@ public class UserPayService {
         if (userPay != null) {
             vo.setExpireTime(userPay.getExpireTime());
             int surplus = 0;
-            if(null != userPay.getExpireTime()){
+            if (null != userPay.getExpireTime()) {
                 surplus = DateUtil.getDayDiff(new Date(), userPay.getExpireTime());
-                if(surplus <= 0){
-                   surplus = 0;
+                if (surplus <= 0) {
+                    surplus = 0;
                 }
-                if(surplus == 0){
-                    if(DateUtil.isNow(userPay.getExpireTime())){
+                if (surplus == 0) {
+                    if (DateUtil.isNow(userPay.getExpireTime())) {
                         // 时间是当天的话 加 1
                         surplus = surplus + 1;
                     }
@@ -253,7 +253,6 @@ public class UserPayService {
     private UserOrder save(UserOrder userOrder) {
         return userOrderRepository.save(userOrder);
     }
-
 
 
     public WxPayAppOrderResult wechatPayMoney(String amount) {
@@ -274,10 +273,9 @@ public class UserPayService {
         Long orderId = new IdWorker(1, 1, 1).nextId();
         //商户订单号
         orderRequest.setOutTradeNo(orderId + "");
-        //todo 上线使用price
         BigDecimal price = new BigDecimal(amount).multiply(new BigDecimal(100));
         //价钱
-        orderRequest.setTotalFee(1);
+        orderRequest.setTotalFee(Integer.parseInt(price + ""));
         //ip地址
         orderRequest.setSpbillCreateIp(ProjectUtil.getIpAddr());
         SimpleDateFormat timeFormat = new SimpleDateFormat("yyyyMMddHHmmss");
@@ -294,7 +292,7 @@ public class UserPayService {
                     .orderId(orderId)
                     .userId(userInfoDto.getUserId() + "")
                     .body("收集宝")
-                    .totalFee(new BigDecimal(1)) // todo 测试时使用
+                    .totalFee(price) // todo 测试时使用
                     .ipAddress(ProjectUtil.getIpAddr())
                     .timeStart(DateUtil.getMMDDYYHHMMSS(new Date()))
                     .timeExpire(DateUtil.getMMDDYYHHMMSS(expire.getTime()))
@@ -314,11 +312,6 @@ public class UserPayService {
         }
     }
 
-    @Value("${jsapi.AppSecret}")
-    private String AppSecret;
-
-    @Value("${jsapi.appid}")
-    private String appid;
 
     //公众号支付
     public String jsapiPayMoney(String amount) {
@@ -342,7 +335,7 @@ public class UserPayService {
         //todo 上线使用price
         BigDecimal price = new BigDecimal(amount).multiply(new BigDecimal(100));
         //价钱
-        orderRequest.setTotalFee(1);
+        orderRequest.setTotalFee(Integer.parseInt(price + ""));
         //ip地址
         orderRequest.setSpbillCreateIp(ProjectUtil.getIpAddr());
         SimpleDateFormat timeFormat = new SimpleDateFormat("yyyyMMddHHmmss");
@@ -357,9 +350,9 @@ public class UserPayService {
             //todo 生成订单信息
             UserOrder userOrder = UserOrder.builder()
                     .orderId(orderId)
-                    .userId(userInfoDto.getUserId()+"")
+                    .userId(userInfoDto.getUserId() + "")
                     .body("收集宝")
-                    .totalFee(new BigDecimal(1)) // todo 测试时使用
+                    .totalFee(price) // todo 测试时使用
                     .ipAddress(ProjectUtil.getIpAddr())
                     .timeStart(DateUtil.getMMDDYYHHMMSS(new Date()))
                     .timeExpire(DateUtil.getMMDDYYHHMMSS(expire.getTime()))
@@ -374,7 +367,7 @@ public class UserPayService {
             //return wxPayAppOrderResult;
         } catch (WxPayException e) {
             // TODO
-            log.error("【唤醒微信APP支付失败】订单ID：{}, 信息：{}",orderId, e.getMessage(),e);
+            log.error("【唤醒微信APP支付失败】订单ID：{}, 信息：{}", orderId, e.getMessage(), e);
             throw new ProjectException("微信统一下单失败");
         }
         return "";
@@ -454,47 +447,46 @@ public class UserPayService {
     @Autowired
     private RestTemplate restTemplate;
 
-    public Map<String, Object> wechatAuth(String code,Integer totalFee) throws IOException {
+    public Map<String, Object> wechatAuth(String code, Integer totalFee) throws IOException {
         LoginUserInfoDto userInfoDto = LoginUserThreadLocal.get();
         if (userInfoDto == null) {
             throw new NotLoginException("请先登陆");
         }
         String ipAddr = ProjectUtil.getIpAddr();
-        log.info("【支付用户IP地址】: {}",ipAddr);
+        log.info("【支付用户IP地址】: {}", ipAddr);
         String format = MessageFormat.format("https://api.weixin.qq.com/sns/oauth2/access_token?appid={0}&secret={1}&code={2}&grant_type=authorization_code",
-               "wx96095d1c2acffb94","83888971018c3054bd1ad72f099edea8", code);
+                "wx96095d1c2acffb94", "83888971018c3054bd1ad72f099edea8", code);
         String s = restTemplate.getForObject(format, String.class);
-        log.info("【openid 返回结果 】: {}",new Gson().toJson(s));
-        Map<String,String> codeMap = JsonUtils.toObject(s, Map.class);
+        log.info("【openid 返回结果 】: {}", new Gson().toJson(s));
+        Map<String, String> codeMap = JsonUtils.toObject(s, Map.class);
         IdWorker idWorker = new IdWorker(1, 1, 1);
         long orderId = idWorker.nextId();
         String body = "公众号支付";            // 商家自己随便写的消息
         String out_trade_no = String.valueOf(orderId);  // 订单ID
-        totalFee = totalFee*100; // 金额转成分  // 金额
+        totalFee = totalFee * 100; // 金额转成分  // 金额
         String userIp = "111.204.59.194"; // 用户IP地址
         //String userIp = getIpAddr(request); // 用户IP地址
         String openId = codeMap.get("openid");  // code 请求返回的ID
-        String s1 = unifiedOrder(body,out_trade_no,totalFee,ipAddr,openId); // 获取预支付结果
-        log.info("【预支付返回结果 】: {}",new Gson().toJson(s1));
+        String s1 = unifiedOrder(body, out_trade_no, totalFee, ipAddr, openId); // 获取预支付结果
+        log.info("【预支付返回结果 】: {}", new Gson().toJson(s1));
         Map<String, Object> mapMap = getPayMap(s1);
         //todo 生成订单信息
-
-//        UserOrder userOrder = UserOrder.builder()
-//                .orderId(orderId)
-//                .userId(userInfoDto.getUserId() + "")
-//                .body("收集宝")
-//                .totalFee(new BigDecimal(1)) // todo 测试时使用
-//                .ipAddress(ProjectUtil.getIpAddr())
-//                .timeStart(DateUtil.getMMDDYYHHMMSS(new Date()))
-//                .timeExpire(DateUtil.getMMDDYYHHMMSS(new Date()))
-//                .payPlatform("JSAPIPay")
-//                .orderPayStatus(0)
-//                .orderShipStatus(0)
-//                .orderStatus(PayStatus.unpaid)
-//                .timeStamp(DateUtil.getMMDDYYHHMMSS(new Date()))
-//                .orderMetaData("{\"sign\":\"" + mapMap.get("paySign") + "\"}").build();
-//        save(userOrder);
-        return  mapMap;// 解析xml 返回 map
+        UserOrder userOrder = UserOrder.builder()
+                .orderId(orderId)
+                .userId(userInfoDto.getUserId() + "")
+                .body("收集宝")
+                .totalFee(new BigDecimal(totalFee)) // todo 测试时使用
+                .ipAddress(ProjectUtil.getIpAddr())
+                .timeStart(DateUtil.getMMDDYYHHMMSS(new Date()))
+                .timeExpire(DateUtil.getMMDDYYHHMMSS(new Date()))
+                .payPlatform("JSAPIPay")
+                .orderPayStatus(0)
+                .orderShipStatus(0)
+                .orderStatus(PayStatus.unpaid)
+                .timeStamp(DateUtil.getMMDDYYHHMMSS(new Date()))
+                .orderMetaData("{\"sign\":\"" + mapMap.get("paySign") + "\"}").build();
+        save(userOrder);
+        return mapMap;// 解析xml 返回 map
     }
 
 }
