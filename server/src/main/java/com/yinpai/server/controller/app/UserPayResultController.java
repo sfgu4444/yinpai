@@ -51,11 +51,11 @@ public class UserPayResultController {
         return userPayRecordService.appleOrderDetermine(map.get("map"));
     }
 
-    @ApiOperation("供公众号确认订单")
+    @ApiOperation("供微信公众号平台回调")
     @PostMapping("/callbackjsApipayApp")
     //@WebLog(description = "供公众号确认订单")
-    public String jsApiPayResult(HttpServletRequest request, HttpServletResponse response) throws JSONException, IOException {
-        return userPayRecordService.jsApiPayResult(request,response);
+    public void jsApiPayResult(HttpServletRequest request, HttpServletResponse response) throws JSONException, IOException {
+         userPayRecordService.jsApiPayResult(request,response);
     }
 
 
