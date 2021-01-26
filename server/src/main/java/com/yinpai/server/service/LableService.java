@@ -50,6 +50,10 @@ public class LableService {
         return lableRepository.findById(id).orElseThrow(() -> new ProjectException("标签为空"));
     }
 
+    public Lable findById(Integer id) {
+        return lableRepository.findById(id).orElse(new Lable());
+    }
+
     public void edit(Lable lable) {
         if(StringUtils.isBlank(lable.getId()+"")||StringUtils.isBlank(lable.getLableName())){
             throw new ProjectException("参数为空");

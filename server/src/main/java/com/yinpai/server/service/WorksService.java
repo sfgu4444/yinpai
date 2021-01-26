@@ -121,9 +121,12 @@ public class WorksService {
             vo.setDownloadCount(userDownloadRecordService.workDownloadCount(w.getId()));
             vo.setCollectionCount(userCollectionService.workCollectionCount(w.getId()));
             if(null != w.getLable()){
-                Lable lable = lableService.findByIdNotNull(w.getLable());
+                //Lable lable = lableService.findByIdNotNull(w.getLable());
+                Lable lable = lableService.findById(w.getLable());
                 if(null != lable){
                     vo.setLable(lable.getLableName());
+                }else {
+                    vo.setLable("无");
                 }
             }
 
@@ -179,7 +182,8 @@ public class WorksService {
             vo.setLookCount(w.getLookCount());
             vo.setCreateTime(w.getCreateTime());
             if(null != w.getLable()){
-                Lable lable = lableService.findByIdNotNull(w.getLable());
+               // Lable lable = lableService.findByIdNotNull(w.getLable());
+                Lable lable = lableService.findById(w.getLable());
                 if(null != lable){
                     vo.setLable(lable.getLableName());
                 }
@@ -217,8 +221,9 @@ public class WorksService {
         vo.setCommentCount(worksCommentService.commentCount(workId));
         vo.setCollectionCount(userCollectionService.workCollectionCount(workId));
         if(null != works.getLable()){
-           Lable lable = lableService.findByIdNotNull(works.getLable());
-           if(null != lable){
+           //Lable lable = lableService.findByIdNotNull(works.getLable());
+            Lable lable = lableService.findById(works.getLable());
+            if(null != lable){
                vo.setLable(lable.getLableName());
            }
         }
