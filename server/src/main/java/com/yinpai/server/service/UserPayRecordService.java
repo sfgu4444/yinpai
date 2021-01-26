@@ -373,7 +373,7 @@ public class UserPayRecordService {
         try {
             if (orderStatus == PayStatus.unpaid || orderShipStatus == 0 || orderPayStatus == 0) {
                 //加钱
-                addUserMoney(user, totalFee.divide(new BigDecimal(100)));
+                addUserMoney(user, totalFee.divide(userOrder.getTotalFee()));
                 userOrder.setOrderShipStatus(1);
                 userOrder.setOrderStatus(PayStatus.topaid);
                 userOrder.setOrderPayStatus(1);
